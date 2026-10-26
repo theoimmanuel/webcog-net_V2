@@ -89,6 +89,22 @@
   .hud button { flex:1; background:#1e3a5f; color:#e6edf3; border:1px solid #2d3a48; border-radius:6px; padding:7px; font-size:12px; cursor:pointer; }
   .hud button:hover { background:#2a4e7a; }
   .hud .note { font-size:11px; color:#6b7684; margin-top:8px; line-height:1.4; }
+  .hud .gaze-ctl { display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid #2d3a48; }
+  .hud .gaze-ctl span { color:#9aa7b4; }
+  .hud .gaze-ctl button { flex:0 0 auto; padding:5px 12px; }
+  .hud .gaze-ctl button.on { background:#1e3a5f; border-color:#4a9eff; color:#cfe6ff; }
+
+  /* ============ EYE-TRACKER GAZE OVERLAY (mock, cursor-driven) ============ */
+  #gazeLayer { position: fixed; inset: 0; z-index: 2500; pointer-events: none; }
+  .gaze {
+    position: absolute; left: 0; top: 0; border-radius: 50%;
+    border: 2px solid rgba(74,158,255,.9);
+    background: radial-gradient(circle at 50% 50%, rgba(74,158,255,.35), rgba(74,158,255,.05) 70%, transparent 72%);
+    box-shadow: 0 0 24px 6px rgba(74,158,255,.35);
+    transform: translate(-50%,-50%); will-change: left, top, width, height;
+  }
+  .gaze.primary { mix-blend-mode: screen; }
+  .gaze.trail { border-color: rgba(74,158,255,.35); background: radial-gradient(circle, rgba(74,158,255,.18), transparent 70%); box-shadow: none; }
 
   /* ============ CALM MODE (applied by WebCog-Net) ============ */
   body.calm {
@@ -115,6 +131,7 @@
 </style>
 </head>
 <body>
+<div id="gazeLayer"></div>
 <div class="scenario-tag">SCENARIO C — WebCog-Net: adaptive, closed-loop decluttering</div>
 <div class="marquee"><span>🔥 MEGA SALE!! 90% OFF EVERYTHING!! LIMITED TIME!! BOOK NOW OR CRY LATER!! 🔥 FREE HOTEL!! FREE CAR!! 🔥</span></div>
 
@@ -182,7 +199,11 @@
     <button id="btn-reset">Reset UI</button>
     <button id="btn-force">Force declutter</button>
   </div>
-  <div class="note">Auto-declutters when load stays high for ~3s. In the real system this signal comes from the on-device 1D CNN-GRU over a 5s window.</div>
+  <div class="gaze-ctl">
+    <span>Eye-tracker overlay</span>
+    <button id="btn-gaze" class="on">ON</button>
+  </div>
+  <div class="note">Auto-declutters when load stays high for ~3s. In the real system this signal comes from the on-device 1D CNN-GRU over a 5s window. Blue ellipses project the (mock, cursor-driven) gaze as the user reads.</div>
 </div>
 
 <script>
@@ -288,6 +309,83 @@
       else clearInterval(step);
     }, 150);
   }, 6000);
+
+  // ============ EYE-TRACKER GAZE OVERLAY (mock, cursor-driven) ============
+  // Projects the user's estimated gaze onto the page as a bright blue primary
+  // ellipse plus a fading trail. In this mock the gaze target follows the mouse
+  // (reading movement); real gaze would come from a webcam model + calibration.
+  (function () {
+    var layer = document.getElementById('gazeLayer');
+    var TRAIL = 7;
+    var nodes = [];
+    for (var i = 0; i < TRAIL; i++) {
+      var el = document.createElement('div');
+      el.className = 'gaze ' + (i === 0 ? 'primary' : 'trail');
+      el.style.display = 'none';
+      layer.appendChild(el);
+      nodes.push(el);
+    }
+
+    // tx/ty: where the mock thinks the user is looking (cursor target).
+    var tx = window.innerWidth / 2, ty = window.innerHeight / 2;
+    var gx = tx, gy = ty;            // smoothed, rendered point
+    var history = [];                // recent points for the trail
+    var running = true;
+    var start = null;
+
+    window.addEventListener('pointermove', function (e) { tx = e.clientX; ty = e.clientY; });
+
+    function noise(amp) { return (Math.random() - 0.5) * amp; }
+
+    function frame(ts) {
+      if (!running) return;
+      if (start === null) start = ts;
+      var tsec = (ts - start) / 1000;
+
+      // saccade-like jitter + micro-tremor around the reading point
+      var jx = tx + noise(22) + Math.sin(tsec * 2.3) * 5;
+      var jy = ty + noise(22) + Math.cos(tsec * 1.9) * 5;
+
+      // exponential smoothing toward the jittered target (fixation dynamics)
+      gx += (jx - gx) * 0.18;
+      gy += (jy - gy) * 0.18;
+
+      // pupil-like pulsing of the ellipse size
+      var w = 52 + Math.sin(tsec * 3.1) * 7;
+      var h = 52 * 0.72 + Math.cos(tsec * 2.7) * 6;
+
+      history.unshift({ x: gx, y: gy });
+      if (history.length > TRAIL) history.pop();
+
+      for (var i = 0; i < nodes.length; i++) {
+        var p = history[i], n = nodes[i];
+        if (!p) { n.style.display = 'none'; continue; }
+        var k = 1 - i / TRAIL;
+        n.style.display = 'block';
+        n.style.left = p.x + 'px';
+        n.style.top = p.y + 'px';
+        n.style.width = (w * (0.5 + 0.5 * k)) + 'px';
+        n.style.height = (h * (0.5 + 0.5 * k)) + 'px';
+        n.style.opacity = (i === 0 ? 1 : 0.55 * k).toFixed(2);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function startGaze() { if (!running) { running = true; start = null; requestAnimationFrame(frame); } }
+    function stopGaze() {
+      running = false;
+      for (var i = 0; i < nodes.length; i++) nodes[i].style.display = 'none';
+      history.length = 0;
+    }
+
+    var btnGaze = document.getElementById('btn-gaze');
+    btnGaze.onclick = function () {
+      if (running) { stopGaze(); btnGaze.textContent = 'OFF'; btnGaze.classList.remove('on'); }
+      else { startGaze(); btnGaze.textContent = 'ON'; btnGaze.classList.add('on'); }
+    };
+
+    requestAnimationFrame(frame);
+  })();
 </script>
 </body>
 </html>
