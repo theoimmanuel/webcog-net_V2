@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WebCog-Net — Eye-Tracker Mock-up</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; }
+  body {
+    font-family:"Segoe UI",system-ui,sans-serif;
+    background:#0f1419; color:#e6edf3; line-height:1.5;
+    overflow:hidden;
+  }
+
+  /* ---- gaze overlay sits above everything, ignores clicks ---- */
+  #gazeLayer {
+    position:fixed; inset:0; z-index:9000; pointer-events:none;
+  }
+
+  /* dynamic blue gaze ellipse */
+  .gaze {
+    position:absolute; left:0; top:0;
+    border-radius:50%;
+    border:2px solid rgba(74,158,255,.9);
+    background:radial-gradient(circle at 50% 50%, rgba(74,158,255,.35), rgba(74,158,255,.05) 70%, transparent 72%);
+    box-shadow:0 0 24px 6px rgba(74,158,255,.35);
+    transform:translate(-50%,-50%);
+    will-change:left,top,width,height;
+  }
+  /* primary fixation point */
+  .gaze.primary { mix-blend-mode:screen; }
+  /* faded trailing points */
+  .gaze.trail { border-color:rgba(74,158,255,.35); background:radial-gradient(circle,rgba(74,158,255,.18),transparent 70%); box-shadow:none; }
+
+  /* ---- page content ---- */
+  .app { height:100%; display:grid; grid-template-rows:auto 1fr auto; }
+
+  header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; border-bottom:1px solid #2d3a48; background:#141b23;
+  }
+  header h1 { font-size:18px; letter-spacing:.3px; }
+  header h1 span { color:#4a9eff; }
+  .status { display:flex; align-items:center; gap:10px; font-size:13px; color:#9aa7b4; }
+  .dot { width:9px; height:9px; border-radius:50%; background:#6b7684; box-shadow:0 0 0 0 rgba(74,158,255,.6); }
+  .dot.live { background:#19c37d; animation:pulse 1.6s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(25,195,125,.5);} 70%{box-shadow:0 0 0 8px rgba(25,195,125,0);} 100%{box-shadow:0 0 0 0 rgba(25,195,125,0);} }
+
+  main { position:relative; overflow:hidden; }
+  .stage { height:100%; padding:40px; display:flex; flex-direction:column; gap:22px; }
+  .hint { color:#9aa7b4; font-size:14px; }
+
+  /* calibration / look targets scattered on screen to make tracking visible */
+  .targets { position:relative; flex:1; border:1px dashed #2d3a48; border-radius:14px; }
+  .target {
+    position:absolute; width:120px; height:72px; transform:translate(-50%,-50%);
+    background:#1a222c; border:1px solid #2d3a48; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; color:#c6d2de; text-align:center; padding:8px; transition:border-color .2s,background .2s;
+  }
+  .target.hot { border-color:#4a9eff; background:#15283f; }
+
+  /* webcam preview (mock) */
+  .cam {
+    position:absolute; right:24px; bottom:24px; width:200px; height:150px;
+    background:#0a0e12; border:1px solid #2d3a48; border-radius:10px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .cam video, .cam canvas { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
+  .cam .ph { color:#55616e; font-size:12px; text-align:center; padding:10px; }
+  .cam .label { position:absolute; top:6px; left:8px; font-size:10px; letter-spacing:.5px; color:#4a9eff; background:rgba(10,14,18,.7); padding:2px 6px; border-radius:4px; }
+  .cam .facebox { position:absolute; border:1.5px solid #19c37d; border-radius:6px; display:none; }
+
+  footer {
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    padding:14px 28px; border-top:1px solid #2d3a48; background:#141b23; font-size:13px;
+  }
+  button {
+    font:inherit; font-size:13px; cursor:pointer; color:#e6edf3;
+    background:#1f2a36; border:1px solid #39485a; border-radius:8px; padding:8px 16px;
+    transition:border-color .2s,background .2s;
+  }
+  button:hover { border-color:#4a9eff; }
+  button.primary { background:#1e3a5f; border-color:#4a9eff; color:#cfe6ff; }
+  button:disabled { opacity:.45; cursor:default; }
+  .readout { margin-left:auto; color:#9aa7b4; font-variant-numeric:tabular-nums; }
+  .readout b { color:#4a9eff; }
+  .pill { font-size:11px; padding:3px 9px; border-radius:20px; background:#1e3a5f; color:#9ecbff; }
+</style>
+</head>
+<body>
+
+<!-- gaze projection overlay -->
+<div id="gazeLayer"></div>
+
+<div class="app">
+  <header>
+    <h1>WebCog-<span>Net</span> · Eye-Tracker <span class="pill">MOCK-UP</span></h1>
+    <div class="status">
+      <span id="statusDot" class="dot"></span>
+      <span id="statusText">Tracker idle</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="stage">
+      <p class="hint">
+        Visual eye-tracker mock-up. Blue ellipses project the estimated gaze point onto the screen with a fading trail.
+        In this mock, gaze is driven by a smoothed <b>cursor-follow model</b> (and optional webcam preview).
+        Look at / move toward the targets to see them light up.
+      </p>
+
+      <div id="targets" class="targets"></div>
+    </div>
+
+    <!-- mock webcam preview -->
+    <div class="cam">
+      <span class="label">CAM · mock</span>
+      <div id="camPh" class="ph">Webcam preview<br>(click “Enable camera”)</div>
+      <video id="cam" autoplay playsinline muted style="display:none"></video>
+      <div id="faceBox" class="facebox"></div>
+    </div>
+  </main>
+
+  <footer>
+    <button id="btnStart" class="primary">Start tracking</button>
+    <button id="btnCam">Enable camera</button>
+    <button id="btnCalib" disabled>Calibrate (mock)</button>
+    <span class="readout">
+      gaze&nbsp; x:<b id="rx">—</b> &nbsp; y:<b id="ry">—</b> &nbsp;·&nbsp;
+      confidence <b id="rc">—</b>
+    </span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const layer   = document.getElementById("gazeLayer");
+  const dot     = document.getElementById("statusDot");
+  const stTxt   = document.getElementById("statusText");
+  const btnStart= document.getElementById("btnStart");
+  const btnCam  = document.getElementById("btnCam");
+  const btnCalib= document.getElementById("btnCalib");
+  const rx = document.getElementById("rx"), ry = document.getElementById("ry"), rc = document.getElementById("rc");
+  const targetsEl = document.getElementById("targets");
+
+  // ---- build the primary gaze ellipse + a short trail of fading ellipses ----
+  const TRAIL = 7;
+  const nodes = [];
+  for (let i = 0; i < TRAIL; i++) {
+    const el = document.createElement("div");
+    el.className = "gaze " + (i === 0 ? "primary" : "trail");
+    el.style.display = "none";
+    layer.appendChild(el);
+    nodes.push(el);
+  }
+
+  // ---- scatter "look targets" so the projected gaze is easy to read ----
+  const TARGET_POS = [
+    [15,22,"Top-left"],[50,16,"Header"],[85,24,"Top-right"],
+    [22,55,"Content A"],[50,52,"Focus"],[78,58,"Content B"],
+    [18,85,"Footer L"],[50,86,"Center-bottom"],[82,84,"Footer R"],
+  ];
+  const targetEls = TARGET_POS.map(([x,y,label]) => {
+    const t = document.createElement("div");
+    t.className = "target";
+    t.style.left = x + "%";
+    t.style.top  = y + "%";
+    t.textContent = label;
+    targetsEl.appendChild(t);
+    return t;
+  });
+
+  // ---- gaze model state ----
+  // target point = where the mock thinks the user is looking (follows cursor, with jitter)
+  let tx = window.innerWidth / 2, ty = window.innerHeight / 2;
+  // smoothed point actually rendered
+  let gx = tx, gy = ty;
+  const history = [];           // recent smoothed points for the trail
+  let running = false;
+  let raf = null;
+  let t0 = 0;
+
+  // cursor drives the "true" gaze target in this mock
+  window.addEventListener("pointermove", (e) => { tx = e.clientX; ty = e.clientY; });
+
+  function noise(amp){ return (Math.random() - 0.5) * amp; }
+
+  function setStatus(text, live){
+    stTxt.textContent = text;
+    dot.classList.toggle("live", !!live);
+  }
+
+  function loop(ts){
+    if (!running) return;
+    if (!t0) t0 = ts;
+    const t = (ts - t0) / 1000;
+
+    // saccade-like jitter + micro-tremor around the cursor target
+    const jx = tx + noise(26) + Math.sin(t * 2.3) * 6;
+    const jy = ty + noise(26) + Math.cos(t * 1.9) * 6;
+
+    // exponential smoothing toward jittered target (fixation dynamics)
+    const ease = 0.18;
+    gx += (jx - gx) * ease;
+    gy += (jy - gy) * ease;
+
+    // pupil-like pulsing of the ellipse size
+    const base = 54;
+    const w = base + Math.sin(t * 3.1) * 7;
+    const h = (base * 0.72) + Math.cos(t * 2.7) * 6;
+
+    // push to history for the trail
+    history.unshift({ x: gx, y: gy });
+    if (history.length > TRAIL) history.pop();
+
+    // render primary + trail
+    for (let i = 0; i < nodes.length; i++) {
+      const p = history[i];
+      const el = nodes[i];
+      if (!p) { el.style.display = "none"; continue; }
+      const k = 1 - i / TRAIL;              // fade/shrink older points
+      el.style.display = "block";
+      el.style.left = p.x + "px";
+      el.style.top  = p.y + "px";
+      el.style.width  = (w * (0.5 + 0.5 * k)) + "px";
+      el.style.height = (h * (0.5 + 0.5 * k)) + "px";
+      el.style.opacity = (i === 0 ? 1 : 0.55 * k).toFixed(2);
+    }
+
+    // highlight whatever target the gaze is over
+    for (const el of targetEls) {
+      const r = el.getBoundingClientRect();
+      const hot = gx >= r.left && gx <= r.right && gy >= r.top && gy <= r.bottom;
+      el.classList.toggle("hot", hot);
+    }
+
+    // readout
+    rx.textContent = Math.round(gx);
+    ry.textContent = Math.round(gy);
+    rc.textContent = (0.7 + Math.abs(Math.sin(t)) * 0.28).toFixed(2);
+
+    raf = requestAnimationFrame(loop);
+  }
+
+  function start(){
+    running = true;
+    t0 = 0;
+    btnStart.textContent = "Stop tracking";
+    btnCalib.disabled = false;
+    setStatus("Tracking gaze", true);
+    raf = requestAnimationFrame(loop);
+  }
+  function stop(){
+    running = false;
+    if (raf) cancelAnimationFrame(raf);
+    nodes.forEach(n => n.style.display = "none");
+    targetEls.forEach(t => t.classList.remove("hot"));
+    btnStart.textContent = "Start tracking";
+    btnCalib.disabled = true;
+    setStatus("Tracker idle", false);
+    rx.textContent = ry.textContent = rc.textContent = "—";
+  }
+  btnStart.addEventListener("click", () => running ? stop() : start());
+
+  // ---- optional real webcam preview (purely cosmetic in the mock) ----
+  const cam = document.getElementById("cam");
+  const camPh = document.getElementById("camPh");
+  const faceBox = document.getElementById("faceBox");
+  let camStream = null;
+
+  btnCam.addEventListener("click", async () => {
+    if (camStream) {
+      camStream.getTracks().forEach(tr => tr.stop());
+      camStream = null; cam.style.display = "none"; camPh.style.display = "block";
+      faceBox.style.display = "none"; btnCam.textContent = "Enable camera"; return;
+    }
+    try {
+      camStream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
+      cam.srcObject = camStream; cam.style.display = "block"; camPh.style.display = "none";
+      btnCam.textContent = "Disable camera";
+      // mock "face detected" box so the preview feels like a tracker
+      faceBox.style.cssText += "display:block;left:30%;top:22%;width:40%;height:52%;";
+    } catch (err) {
+      camPh.innerHTML = "Camera unavailable<br><span style='color:#ff8a8a'>" + (err.name || "error") + "</span>";
+    }
+  });
+
+  // ---- mock calibration: brief sweep of the gaze point to each target ----
+  btnCalib.addEventListener("click", async () => {
+    if (!running) return;
+    btnCalib.disabled = true;
+    setStatus("Calibrating…", true);
+    const prev = { tx, ty };
+    for (const el of targetEls) {
+      const r = el.getBoundingClientRect();
+      tx = r.left + r.width / 2;
+      ty = r.top + r.height / 2;
+      await new Promise(res => setTimeout(res, 420));
+    }
+    tx = prev.tx; ty = prev.ty;
+    setStatus("Tracking gaze", true);
+    btnCalib.disabled = false;
+  });
+})();
+</script>
+</body>
+</html>
