@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkyBook — Scenario C (WebCog-Net Adaptive)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
+  @keyframes rainbow { 0%{color:#ff0040} 25%{color:#00c3ff} 50%{color:#19ff00} 75%{color:#ff8a00} 100%{color:#ff0040} }
+  @keyframes slidein { from{transform:translateX(120%)} to{transform:translateX(0)} }
+  @keyframes scroll { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
+
+  body {
+    font-family: "Comic Sans MS", "Arial", sans-serif;
+    background: #fffb00;
+    background-image: repeating-linear-gradient(45deg,#fffb00 0 20px,#fff600 20px 40px);
+    color: #1a1a1a; font-size: 15px; line-height: 1.3; overflow-x: hidden;
+    transition: background 0.8s ease, color 0.8s ease, font-family 0.8s ease, font-size 0.8s ease, line-height 0.8s ease;
+  }
+  .scenario-tag {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: #0a4d2e; color: #fff; text-align: center; padding: 6px;
+    font-size: 13px; z-index: 9999; font-family: Arial, sans-serif;
+  }
+  .marquee { margin-top: 28px; background: #ff0040; color: #fff; padding: 8px; white-space: nowrap; overflow: hidden; font-weight: bold; font-size: 18px; transition: all 0.6s; }
+  .marquee span { display: inline-block; animation: scroll 12s linear infinite; }
+  header {
+    background: linear-gradient(90deg,#ff00c8,#00c3ff,#19ff00,#ff8a00);
+    padding: 14px; display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: 10px; border-bottom: 5px dashed #ff0040;
+    transition: all 0.8s ease;
+  }
+  .logo { font-size: 30px; font-weight: 900; color: #fff; text-shadow: 2px 2px 0 #000, -1px -1px 0 #ff0040; animation: shake 0.6s infinite; transition: all 0.8s; }
+  .nav-links { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; }
+  .nav-links a { background: #fff; color: #d10000; padding: 7px 11px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 13px; border: 2px solid #000; transition: all 0.6s; }
+  .nav-links a:nth-child(odd) { background: #19ff00; color: #000; }
+  .layout { display: flex; gap: 12px; padding: 14px; transition: all 0.8s; }
+  .sidebar { width: 230px; flex-shrink: 0; transition: all 0.6s; }
+  .sidebar .ad { background: #fff; border: 4px solid #ff0040; border-radius: 8px; padding: 12px; margin-bottom: 12px; text-align: center; animation: blink 1.2s infinite; }
+  .sidebar .ad:nth-child(2) { border-color:#00c3ff; animation: shake 0.5s infinite; }
+  .sidebar .ad:nth-child(3) { border-color:#19ff00; }
+  .ad h4 { font-size: 20px; animation: rainbow 1.5s infinite; }
+  .ad .big { font-size: 28px; font-weight: 900; color:#d10000; }
+  .ad button { background:#ff0040; color:#fff; border:none; padding:8px 14px; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:6px; animation: blink 0.8s infinite; }
+  .main-col { flex: 1; }
+  h1 { font-size: 26px; color:#d10000; text-shadow:1px 1px 0 #fff; animation: rainbow 2s infinite; margin-bottom: 8px; transition: all 0.8s; }
+  .task-note { background:#000; color:#19ff00; padding:10px; font-family:Arial; font-weight:bold; margin-bottom:12px; border:2px dotted #19ff00; transition: all 0.6s; }
+  .card { background:#fff; border:3px solid #ff00c8; border-radius:8px; padding:16px; margin-bottom:12px; transition: all 0.8s; }
+  .badges { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; transition: all 0.6s; }
+  .badge { background:#ff0040; color:#fff; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; animation: blink 1s infinite; }
+  .badge:nth-child(2){background:#00c3ff} .badge:nth-child(3){background:#19ff00;color:#000} .badge:nth-child(4){background:#ff8a00}
+  .form-row { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  .field { flex:1; min-width:120px; }
+  label { font-size:12px; font-weight:bold; color:#d10000; display:block; transition: all 0.6s; }
+  input,select { width:100%; padding:9px; border:2px solid #00c3ff; border-radius:5px; font-size:14px; background:#fffde0; transition: all 0.6s; }
+  .btn-search { background:#19ff00; color:#000; border:3px solid #000; padding:12px 20px; font-size:17px; font-weight:900; border-radius:8px; cursor:pointer; animation: shake 0.7s infinite; transition: all 0.6s; }
+  .flight { display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:2px dashed #ff00c8; transition: all 0.6s; }
+  .flight-info h3 { font-size:16px; } .flight-info p { font-size:12px; color:#555; }
+  .flight .amount { font-size:20px; font-weight:900; color:#d10000; animation: blink 1.3s infinite; transition: all 0.6s; }
+  .countdown { background:#000; color:#ff0040; font-family:monospace; font-size:22px; padding:8px; text-align:center; font-weight:bold; animation: blink 1s infinite; transition: all 0.6s; }
+  .popup { position: fixed; background:#fff; border:5px solid #ff0040; border-radius:12px; padding:22px; z-index:1000; box-shadow:0 0 0 9999px rgba(0,0,0,0.45); max-width:360px; text-align:center; }
+  .popup h2 { color:#d10000; font-size:24px; animation: rainbow 1.5s infinite; margin-bottom:8px; }
+  .popup p { margin-bottom:12px; }
+  .popup button { background:#19ff00; border:2px solid #000; padding:10px 18px; font-weight:900; border-radius:6px; cursor:pointer; }
+  .popup .close { position:absolute; top:6px; right:10px; background:none; border:none; font-size:20px; cursor:pointer; color:#999; }
+  .toast { position: fixed; right:14px; background:#fff; border-left:6px solid #19ff00; padding:12px 16px; border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.3); font-size:13px; animation: slidein 0.4s ease; z-index:900; max-width:260px; }
+  .chat { position: fixed; bottom:80px; right:14px; background:#00c3ff; color:#fff; border-radius:50px; padding:14px 20px; font-weight:bold; cursor:pointer; z-index:850; animation: shake 1s infinite; box-shadow:0 4px 12px rgba(0,0,0,0.4); transition: all 0.6s; }
+
+  /* ============ WEBCOG-NET HUD ============ */
+  .hud {
+    position: fixed; top: 36px; right: 14px; width: 260px; z-index: 2000;
+    background: #0d1117; color: #e6edf3; border: 1px solid #2d3a48;
+    border-radius: 12px; padding: 16px; font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  }
+  .hud h3 { font-size: 14px; color: #4a9eff; margin-bottom: 10px; display:flex; align-items:center; gap:6px; }
+  .hud .dot { width:8px; height:8px; border-radius:50%; background:#19c37d; display:inline-block; }
+  .metric { display:flex; justify-content:space-between; margin-bottom:6px; color:#9aa7b4; }
+  .metric b { color:#e6edf3; font-variant-numeric: tabular-nums; }
+  .loadbar { height:10px; background:#222c38; border-radius:6px; overflow:hidden; margin:8px 0; }
+  .loadbar > div { height:100%; width:20%; background:linear-gradient(90deg,#19c37d,#e5c200,#ff4d4d); transition: width 0.4s; }
+  .state { text-align:center; font-weight:700; padding:6px; border-radius:6px; margin:8px 0; background:#15311f; color:#19c37d; transition: all 0.4s; }
+  .state.high { background:#3a1515; color:#ff6b6b; }
+  .hud label.ctl { display:block; color:#9aa7b4; margin:10px 0 4px; }
+  .hud input[type=range] { width:100%; }
+  .hud .row { display:flex; gap:6px; margin-top:8px; }
+  .hud button { flex:1; background:#1e3a5f; color:#e6edf3; border:1px solid #2d3a48; border-radius:6px; padding:7px; font-size:12px; cursor:pointer; }
+  .hud button:hover { background:#2a4e7a; }
+  .hud .note { font-size:11px; color:#6b7684; margin-top:8px; line-height:1.4; }
+
+  /* ============ CALM MODE (applied by WebCog-Net) ============ */
+  body.calm {
+    background: #0f1419 !important; background-image: none !important;
+    color: #e6edf3 !important; font-family: "Segoe UI", system-ui, sans-serif !important;
+    font-size: 17px !important; line-height: 1.7 !important;
+  }
+  body.calm *, body.calm *::before, body.calm *::after { animation: none !important; }
+  body.calm .marquee, body.calm .countdown, body.calm .badges,
+  body.calm .sidebar, body.calm .chat, body.calm .popup, body.calm .toast { display: none !important; }
+  body.calm header { background:#1a222c !important; border-bottom:1px solid #2d3a48 !important; }
+  body.calm .logo { color:#4a9eff !important; text-shadow:none !important; font-size:22px !important; }
+  body.calm .nav-links a { background:transparent !important; color:#9aa7b4 !important; border:none !important; font-weight:400 !important; }
+  body.calm .layout { max-width:820px; margin:0 auto; }
+  body.calm h1 { color:#e6edf3 !important; text-shadow:none !important; font-size:28px !important; font-weight:600; }
+  body.calm .task-note { background:#1e3a5f !important; color:#e6edf3 !important; border:1px solid #4a9eff !important; font-family:inherit !important; }
+  body.calm .card { background:#1a222c !important; border:1px solid #2d3a48 !important; }
+  body.calm label { color:#9aa7b4 !important; font-weight:400 !important; }
+  body.calm input, body.calm select { background:#222c38 !important; border:1px solid #2d3a48 !important; color:#e6edf3 !important; }
+  body.calm .btn-search { background:#4a9eff !important; color:#06121f !important; border:none !important; }
+  body.calm .flight { border-bottom:1px solid #2d3a48 !important; }
+  body.calm .flight .amount { color:#4a9eff !important; }
+  body.calm .flight-info p { color:#9aa7b4 !important; }
+</style>
+</head>
+<body>
+<div class="scenario-tag">SCENARIO C — WebCog-Net: adaptive, closed-loop decluttering</div>
+<div class="marquee"><span>🔥 MEGA SALE!! 90% OFF EVERYTHING!! LIMITED TIME!! BOOK NOW OR CRY LATER!! 🔥 FREE HOTEL!! FREE CAR!! 🔥</span></div>
+
+<header>
+  <div class="logo">SkyBook</div>
+  <ul class="nav-links">
+    <li><a href="#">Flights</a></li><li><a href="#">Hotels</a></li>
+    <li><a href="#">Deals</a></li><li><a href="#">VIP</a></li>
+    <li><a href="#">Lottery</a></li><li><a href="#">Help</a></li>
+  </ul>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="ad"><h4>WINNER!!</h4><p>You are visitor #1,000,000!</p><div class="big">🎉 PRIZE 🎉</div><button>CLAIM NOW</button></div>
+    <div class="ad"><h4>HOT DEAL</h4><div class="big">-87%</div><p>Bali villas from Rp 1!</p><button>GRAB IT</button></div>
+    <div class="ad"><h4>⏰ HURRY</h4><div class="countdown" id="side-timer">00:04:59</div><button>BOOK NOW</button></div>
+  </aside>
+
+  <div class="main-col">
+    <h1>Find your flight — Jakarta to Bali</h1>
+    <div class="task-note">Your task: find the cheapest morning flight Jakarta → Bali and start booking it.</div>
+    <div class="countdown" id="top-timer">OFFER ENDS IN 00:04:59 ⏰</div>
+
+    <div class="card">
+      <div class="badges">
+        <span class="badge">BEST PRICE</span><span class="badge">LIMITED</span>
+        <span class="badge">POPULAR</span><span class="badge">ALMOST GONE</span>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>From</label><input value="Jakarta (CGK)" /></div>
+        <div class="field"><label>To</label><input value="Bali (DPS)" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Departure</label><input type="date" value="2026-07-14" /></div>
+        <div class="field"><label>Passengers</label><select><option>1 adult</option></select></div>
+        <div class="field"><label>Class</label><select><option>Economy</option></select></div>
+      </div>
+      <button class="btn-search">Search flights</button>
+    </div>
+
+    <div class="card">
+      <div class="flight"><div class="flight-info"><h3>07:10 → 09:00</h3><p>Garuda · Direct · 1h 50m</p></div><div class="amount">Rp 812,000</div></div>
+      <div class="flight"><div class="flight-info"><h3>09:35 → 11:25</h3><p>Citilink · Direct · 1h 50m</p></div><div class="amount">Rp 749,000</div></div>
+      <div class="flight"><div class="flight-info"><h3>13:20 → 15:15</h3><p>Batik Air · Direct · 1h 55m</p></div><div class="amount">Rp 905,000</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="chat">💬 Chat with us NOW!</div>
+
+<!-- WebCog-Net HUD -->
+<div class="hud">
+  <h3><span class="dot" id="hud-dot"></span> WebCog-Net Monitor</h3>
+  <div class="metric"><span>EAR</span><b id="m-ear">0.00</b></div>
+  <div class="metric"><span>Blink rate</span><b id="m-blink">0 /min</b></div>
+  <div class="metric"><span>Saccade vel.</span><b id="m-sacc">0 °/s</b></div>
+  <div class="metric"><span>Inference</span><b id="m-lat">0.0 ms</b></div>
+  <div class="loadbar"><div id="load-fill"></div></div>
+  <div class="state" id="state">LOAD: LOW</div>
+
+  <label class="ctl">Simulated cognitive load: <b id="slider-val">20</b>%</label>
+  <input type="range" id="load-slider" min="0" max="100" value="20" />
+  <div class="row">
+    <button id="btn-reset">Reset UI</button>
+    <button id="btn-force">Force declutter</button>
+  </div>
+  <div class="note">Auto-declutters when load stays high for ~3s. In the real system this signal comes from the on-device 1D CNN-GRU over a 5s window.</div>
+</div>
+
+<script>
+  // ---- countdown ----
+  var t = 299;
+  var ct = setInterval(function(){
+    t = t > 0 ? t - 1 : 299;
+    var m = String(Math.floor(t/60)).padStart(2,'0'), s = String(t%60).padStart(2,'0');
+    var st = document.getElementById('side-timer'), tt = document.getElementById('top-timer');
+    if (st) st.textContent = '00:'+m+':'+s;
+    if (tt) tt.textContent = 'OFFER ENDS IN 00:'+m+':'+s+' ⏰';
+  }, 1000);
+
+  // ---- popups + toasts (same as scenario B, but stop in calm mode) ----
+  var popups = [
+    {t:'🎁 WAIT! Don\'t leave!', b:'Get an EXTRA 50% off if you subscribe RIGHT NOW!'},
+    {t:'📧 JOIN OUR NEWSLETTER', b:'Enter your email for daily deals!'},
+    {t:'🎰 SPIN TO WIN!', b:'You could win a FREE trip!'}
+  ];
+  function showPopup(i){
+    if (document.body.classList.contains('calm')) return;
+    var p = document.createElement('div'); p.className='popup';
+    p.style.top=(20+Math.random()*40)+'%'; p.style.left=(20+Math.random()*40)+'%';
+    p.innerHTML='<button class="close">×</button><h2>'+popups[i].t+'</h2><p>'+popups[i].b+'</p><button>YES!</button>';
+    document.body.appendChild(p);
+    p.querySelector('.close').onclick=function(){p.remove();};
+    p.querySelectorAll('button')[1].onclick=function(){p.remove();};
+  }
+  var pi=0; setTimeout(function go(){ showPopup(pi%popups.length); pi++; setTimeout(go,5000); }, 3000);
+
+  var names=['Andi from Jakarta','Siti from Bandung','Budi from Surabaya','Rina from Medan'];
+  var toastCount=0;
+  setInterval(function(){
+    if (document.body.classList.contains('calm')) return;
+    var el=document.createElement('div'); el.className='toast';
+    el.style.bottom=(90+(toastCount%3)*70)+'px';
+    el.textContent='✅ '+names[Math.floor(Math.random()*names.length)]+' just booked a flight!';
+    document.body.appendChild(el); toastCount++;
+    setTimeout(function(){el.remove();},3500);
+  }, 3200);
+
+  // ---- WebCog-Net simulated monitor ----
+  var slider = document.getElementById('load-slider');
+  var sliderVal = document.getElementById('slider-val');
+  var fill = document.getElementById('load-fill');
+  var stateEl = document.getElementById('state');
+  var dot = document.getElementById('hud-dot');
+  var highSince = null;
+  var THRESHOLD = 65;      // load % considered "high"
+  var SUSTAIN_MS = 3000;   // must stay high this long
+
+  function rand(a,b){ return a + Math.random()*(b-a); }
+
+  function tick(){
+    var load = parseInt(slider.value, 10);
+    sliderVal.textContent = load;
+    fill.style.width = load + '%';
+
+    // Fake physiological metrics correlated with load (per the paper's signals)
+    var ear = (0.30 - load/100 * 0.10 + rand(-0.01,0.01)).toFixed(2);     // EAR drops under load
+    var blink = Math.max(2, Math.round(18 - load/100 * 14 + rand(-1,1))); // blink rate drops
+    var sacc = Math.round(180 + load/100 * 420 + rand(-20,20));           // saccade velocity rises
+    var lat = (2.2 + rand(-0.6,0.9)).toFixed(1);                           // < 5ms per paper
+    document.getElementById('m-ear').textContent = ear;
+    document.getElementById('m-blink').textContent = blink + ' /min';
+    document.getElementById('m-sacc').textContent = sacc + ' °/s';
+    document.getElementById('m-lat').textContent = lat + ' ms';
+
+    var isHigh = load >= THRESHOLD;
+    stateEl.textContent = isHigh ? 'LOAD: HIGH' : (load >= 40 ? 'LOAD: MODERATE' : 'LOAD: LOW');
+    stateEl.classList.toggle('high', isHigh);
+    dot.style.background = isHigh ? '#ff4d4d' : '#19c37d';
+
+    // closed-loop: sustained high load -> declutter
+    if (isHigh && !document.body.classList.contains('calm')) {
+      if (highSince === null) highSince = Date.now();
+      else if (Date.now() - highSince >= SUSTAIN_MS) enterCalm();
+    } else if (!isHigh) {
+      highSince = null;
+    }
+  }
+  setInterval(tick, 400);
+
+  function enterCalm(){
+    document.body.classList.add('calm');
+    document.querySelectorAll('.popup, .toast').forEach(function(n){ n.remove(); });
+    stateEl.textContent = 'INTERVENTION: decluttered';
+  }
+  function exitCalm(){
+    document.body.classList.remove('calm');
+    highSince = null;
+    slider.value = 20;
+  }
+
+  document.getElementById('btn-force').onclick = enterCalm;
+  document.getElementById('btn-reset').onclick = exitCalm;
+
+  // auto demo: ramp load up after 6s so the intervention is visible without touching anything
+  setTimeout(function(){
+    var target = 85, step = setInterval(function(){
+      var v = parseInt(slider.value,10);
+      if (v < target) slider.value = v + 3;
+      else clearInterval(step);
+    }, 150);
+  }, 6000);
+</script>
+</body>
+</html>

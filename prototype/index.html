@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WebCog-Net — Prototype Scenarios</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:"Segoe UI",system-ui,sans-serif; background:#0f1419; color:#e6edf3; line-height:1.6; }
+  .wrap { max-width:860px; margin:0 auto; padding:64px 32px; }
+  h1 { font-size:30px; margin-bottom:8px; }
+  .sub { color:#9aa7b4; margin-bottom:40px; }
+  .grid { display:grid; grid-template-columns:1fr; gap:16px; }
+  .card { display:block; text-decoration:none; color:inherit; background:#1a222c; border:1px solid #2d3a48; border-radius:12px; padding:24px; transition:border-color .2s; }
+  .card:hover { border-color:#4a9eff; }
+  .card h2 { font-size:19px; margin-bottom:6px; }
+  .card .tag { display:inline-block; font-size:12px; padding:3px 9px; border-radius:20px; margin-bottom:10px; }
+  .a .tag { background:#1e3a5f; color:#9ecbff; }
+  .b .tag { background:#3a1515; color:#ff8a8a; }
+  .c .tag { background:#15311f; color:#19c37d; }
+  .card p { color:#9aa7b4; font-size:15px; }
+  footer { color:#6b7684; font-size:13px; margin-top:40px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>WebCog-Net — Prototype Scenarios</h1>
+  <p class="sub">Three mock flight-booking interfaces used in the within-subjects study. Open each in its own tab.</p>
+  <div class="grid">
+    <a class="card a" href="scenario-a.html">
+      <span class="tag">Scenario A · Baseline</span>
+      <h2>Calm dark interface</h2>
+      <p>Low cognitive load. Dark background, readable text, no animation or pop-ups. The baseline measurement.</p>
+    </a>
+    <a class="card b" href="scenario-b.html">
+      <span class="tag">Scenario B · Static high-load</span>
+      <h2>Bright, cluttered, pop-up heavy</h2>
+      <p>Deliberately overwhelming. Flashing ads, marquees, countdowns, stacking toasts and modal pop-ups. No intervention.</p>
+    </a>
+    <a class="card c" href="scenario-c.html">
+      <span class="tag">Scenario C · Adaptive</span>
+      <h2>WebCog-Net closed-loop</h2>
+      <p>Starts identical to B, then autonomously declutters when sustained high load is detected. Includes a monitor HUD with a load slider and manual controls.</p>
+    </a>
+  </div>
+  <footer>Research prototype · simulated cognitive-load trigger (no webcam used in these HTML mocks).</footer>
+</div>
+</body>
+</html>

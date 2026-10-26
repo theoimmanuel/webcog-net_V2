@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkyBook Deals — Scenario B (High Load)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Gentle, non-flashing motion only. No opacity blinking, no shaking, no color cycling. */
+  @keyframes scroll { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
+  @keyframes slidein { from{transform:translateX(120%); opacity:0} to{transform:translateX(0); opacity:1} }
+  @keyframes softpulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
+  body {
+    font-family: "Arial", sans-serif;
+    background: #f4ead2;
+    color: #2a2a2a; font-size: 15px; line-height: 1.35; overflow-x: hidden;
+  }
+  .scenario-tag {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: #8a1a1a; color: #fff; text-align: center; padding: 6px;
+    font-size: 13px; z-index: 9999;
+  }
+  .marquee {
+    margin-top: 28px; background: #c0392b; color: #fff; padding: 8px;
+    white-space: nowrap; overflow: hidden; font-weight: bold; font-size: 17px;
+  }
+  .marquee span { display: inline-block; animation: scroll 20s linear infinite; }
+  header {
+    background: #2c6e8f;
+    padding: 14px; display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: 10px; border-bottom: 4px solid #c0392b;
+  }
+  .logo { font-size: 28px; font-weight: 900; color: #fff; letter-spacing: 0.5px; }
+  .nav-links { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; }
+  .nav-links a {
+    background: #fff; color: #2c6e8f; padding: 7px 11px; border-radius: 20px;
+    text-decoration: none; font-weight: bold; font-size: 13px; border: 2px solid #1f4e63;
+  }
+  .nav-links a:nth-child(odd) { background: #e67e22; color: #fff; border-color:#b35e13; }
+  .layout { display: flex; gap: 12px; padding: 14px; }
+  .sidebar { width: 230px; flex-shrink: 0; }
+  .sidebar .ad {
+    background: #fff; border: 3px solid #c0392b; border-radius: 8px;
+    padding: 12px; margin-bottom: 12px; text-align: center;
+  }
+  .sidebar .ad:nth-child(2) { border-color:#2c6e8f; }
+  .sidebar .ad:nth-child(3) { border-color:#2e7d32; }
+  .ad h4 { font-size: 19px; color:#c0392b; }
+  .ad:nth-child(2) h4 { color:#2c6e8f; }
+  .ad .big { font-size: 26px; font-weight: 900; color:#c0392b; }
+  .ad button { background:#c0392b; color:#fff; border:none; padding:8px 14px; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:6px; }
+  .main-col { flex: 1; }
+  h1 { font-size: 25px; color:#8a1a1a; margin-bottom: 8px; }
+  .task-note { background:#2a2a2a; color:#f1c40f; padding:10px; font-weight:bold; margin-bottom:12px; border:2px dotted #f1c40f; }
+  .card { background:#fff; border:3px solid #9b59b6; border-radius:8px; padding:16px; margin-bottom:12px; }
+  .badges { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .badge { background:#c0392b; color:#fff; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; }
+  .badge:nth-child(2){background:#2c6e8f} .badge:nth-child(3){background:#2e7d32} .badge:nth-child(4){background:#e67e22}
+  .form-row { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  .field { flex:1; min-width:120px; }
+  label { font-size:12px; font-weight:bold; color:#8a1a1a; display:block; }
+  input,select { width:100%; padding:9px; border:2px solid #2c6e8f; border-radius:5px; font-size:14px; background:#fbf6ea; }
+  .btn-search { background:#2e7d32; color:#fff; border:3px solid #1b5e20; padding:12px 20px; font-size:17px; font-weight:900; border-radius:8px; cursor:pointer; }
+  .flight { display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:2px dashed #9b59b6; }
+  .flight-info h3 { font-size:16px; } .flight-info p { font-size:12px; color:#555; }
+  .flight .amount { font-size:20px; font-weight:900; color:#c0392b; }
+  .countdown { background:#2a2a2a; color:#f1c40f; font-family:monospace; font-size:21px; padding:8px; text-align:center; font-weight:bold; }
+  .popup {
+    position: fixed; background:#fff; border:4px solid #c0392b; border-radius:12px;
+    padding:22px; z-index:1000; box-shadow:0 0 0 9999px rgba(0,0,0,0.45);
+    max-width:360px; text-align:center;
+  }
+  .popup h2 { color:#c0392b; font-size:23px; margin-bottom:8px; }
+  .popup p { margin-bottom:12px; }
+  .popup button { background:#2e7d32; color:#fff; border:2px solid #1b5e20; padding:10px 18px; font-weight:900; border-radius:6px; cursor:pointer; }
+  .popup .close { position:absolute; top:6px; right:10px; background:none; border:none; font-size:20px; cursor:pointer; color:#999; }
+  .toast {
+    position: fixed; right:14px; background:#fff; border-left:6px solid #2e7d32;
+    padding:12px 16px; border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.3);
+    font-size:13px; animation: slidein 0.4s ease; z-index:900; max-width:260px;
+  }
+  .cookie {
+    position: fixed; bottom:0; left:0; right:0; background:#2a2a2a; color:#fff;
+    padding:16px; display:flex; gap:12px; align-items:center; justify-content:center;
+    flex-wrap:wrap; z-index:1100; border-top:4px solid #c0392b;
+  }
+  .cookie button { background:#2e7d32; color:#fff; border:none; padding:10px 18px; font-weight:900; border-radius:6px; cursor:pointer; }
+  .chat {
+    position: fixed; bottom:80px; right:14px; background:#2c6e8f; color:#fff;
+    border-radius:50px; padding:14px 20px; font-weight:bold; cursor:pointer;
+    z-index:850; box-shadow:0 4px 12px rgba(0,0,0,0.4); animation: softpulse 2.5s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+<div class="scenario-tag">SCENARIO B — High cognitive load: clutter &amp; pop-ups (no intervention)</div>
+<div class="marquee"><span>🔥 MEGA SALE!! 90% OFF EVERYTHING!! LIMITED TIME!! BOOK NOW OR CRY LATER!! 🔥 FREE HOTEL!! FREE CAR!! FREE EVERYTHING!! 🔥</span></div>
+
+<header>
+  <div class="logo">SkyBook MEGA</div>
+  <ul class="nav-links">
+    <li><a href="#">🔥 Flights</a></li><li><a href="#">💰 Hotels</a></li>
+    <li><a href="#">🎁 Deals</a></li><li><a href="#">⭐ VIP</a></li>
+    <li><a href="#">🎰 Lottery</a></li><li><a href="#">📞 Help</a></li>
+    <li><a href="#">💎 Premium</a></li>
+  </ul>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="ad"><h4>WINNER!!</h4><p>You are visitor #1,000,000!</p><div class="big">🎉 PRIZE 🎉</div><button>CLAIM NOW</button></div>
+    <div class="ad"><h4>HOT DEAL</h4><div class="big">-87%</div><p>Bali villas from Rp 1!</p><button>GRAB IT</button></div>
+    <div class="ad"><h4>⏰ HURRY</h4><div class="countdown" id="side-timer">00:04:59</div><button>BOOK NOW</button></div>
+  </aside>
+
+  <div class="main-col">
+    <h1>✈️ FIND YOUR FLIGHT (BEST PRICES GUARANTEED!!!) ✈️</h1>
+    <div class="task-note">YOUR TASK: find the cheapest morning flight Jakarta → Bali and start booking it.</div>
+    <div class="countdown" id="top-timer">OFFER ENDS IN 00:04:59 ⏰</div>
+
+    <div class="card">
+      <div class="badges">
+        <span class="badge">BEST PRICE</span><span class="badge">LIMITED</span>
+        <span class="badge">POPULAR</span><span class="badge">ALMOST GONE</span>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>FROM!</label><input value="Jakarta (CGK)" /></div>
+        <div class="field"><label>TO!</label><input value="Bali (DPS)" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>WHEN?!</label><input type="date" value="2026-07-14" /></div>
+        <div class="field"><label>WHO?!</label><select><option>1 adult</option></select></div>
+        <div class="field"><label>CLASS?!</label><select><option>Economy</option><option>VIP GOLD PLATINUM</option></select></div>
+      </div>
+      <button class="btn-search">🔍 SEARCH NOW!!!</button>
+    </div>
+
+    <div class="card">
+      <div class="flight"><div class="flight-info"><h3>07:10 → 09:00</h3><p>Garuda · Direct · ONLY 2 SEATS LEFT!!</p></div><div class="amount">Rp 812,000</div></div>
+      <div class="flight"><div class="flight-info"><h3>09:35 → 11:25</h3><p>Citilink · Direct · 🔥 HOT PICK</p></div><div class="amount">Rp 749,000</div></div>
+      <div class="flight"><div class="flight-info"><h3>13:20 → 15:15</h3><p>Batik · Direct · BOOK FAST!</p></div><div class="amount">Rp 905,000</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="chat">💬 Chat with us NOW!</div>
+
+<div class="cookie">
+  🍪 We use 10,000 cookies to track EVERYTHING about you!
+  <button>ACCEPT ALL</button><button>Accept more</button><button>Yes please</button>
+</div>
+
+<script>
+  // countdown timers
+  var t = 299;
+  setInterval(function(){
+    t = t > 0 ? t - 1 : 299;
+    var m = String(Math.floor(t/60)).padStart(2,'0'), s = String(t%60).padStart(2,'0');
+    document.getElementById('side-timer').textContent = '00:'+m+':'+s;
+    document.getElementById('top-timer').textContent = 'OFFER ENDS IN 00:'+m+':'+s+' ⏰';
+  }, 1000);
+
+  // modal popups appearing over time
+  var popups = [
+    {t:'🎁 WAIT! Don\'t leave!', b:'Get an EXTRA 50% off if you subscribe RIGHT NOW!'},
+    {t:'📧 JOIN OUR NEWSLETTER', b:'Enter your email for 500 spam messages per day!'},
+    {t:'🎰 SPIN TO WIN!', b:'You could win a FREE trip! (You will not win.)'},
+    {t:'⚠️ LAST CHANCE!', b:'This deal expires in 3... 2... 1... (restarts forever)'}
+  ];
+  function showPopup(i){
+    var p = document.createElement('div');
+    p.className = 'popup';
+    p.style.top = (18 + Math.random()*45) + '%';
+    p.style.left = (18 + Math.random()*45) + '%';
+    p.innerHTML = '<button class="close">×</button><h2>'+popups[i].t+'</h2><p>'+popups[i].b+'</p><button>YES! GIVE ME MORE!</button>';
+    document.body.appendChild(p);
+    p.querySelector('.close').onclick = function(){ p.remove(); };
+    p.querySelectorAll('button')[1].onclick = function(){ p.remove(); };
+  }
+  var pi = 0;
+  setTimeout(function go(){ showPopup(pi % popups.length); pi++; setTimeout(go, 4500); }, 2500);
+
+  // toast notifications stacking
+  var names = ['Andi from Jakarta','Siti from Bandung','Budi from Surabaya','Rina from Medan','Dewi from Bali'];
+  var toastCount = 0;
+  setInterval(function(){
+    var el = document.createElement('div');
+    el.className = 'toast';
+    el.style.bottom = (90 + (toastCount%3)*70) + 'px';
+    el.textContent = '✅ ' + names[Math.floor(Math.random()*names.length)] + ' just booked a flight!';
+    document.body.appendChild(el);
+    toastCount++;
+    setTimeout(function(){ el.remove(); }, 3500);
+  }, 3000);
+</script>
+</body>
+</html>

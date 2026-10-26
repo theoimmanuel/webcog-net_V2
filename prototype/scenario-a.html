@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkyBook — Scenario A (Baseline)</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --surface: #1a222c;
+    --surface-2: #222c38;
+    --border: #2d3a48;
+    --text: #e6edf3;
+    --text-dim: #9aa7b4;
+    --accent: #4a9eff;
+    --accent-soft: #1e3a5f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .scenario-tag {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: var(--accent-soft); color: var(--text);
+    text-align: center; padding: 6px; font-size: 13px;
+    letter-spacing: 0.5px; z-index: 50; border-bottom: 1px solid var(--border);
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0; margin-top: 32px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 32px; }
+  nav { display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-size: 22px; font-weight: 600; color: var(--accent); letter-spacing: 0.5px; }
+  .nav-links { display: flex; gap: 28px; list-style: none; }
+  .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 15px; }
+  .nav-links a:hover { color: var(--text); }
+  main { padding: 56px 0; }
+  h1 { font-size: 30px; font-weight: 600; margin-bottom: 12px; }
+  .lede { color: var(--text-dim); margin-bottom: 40px; max-width: 620px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  .form-row { display: flex; gap: 20px; margin-bottom: 20px; }
+  .field { flex: 1; }
+  label { display: block; font-size: 14px; color: var(--text-dim); margin-bottom: 8px; }
+  input, select {
+    width: 100%; padding: 13px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 15px;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  .btn {
+    background: var(--accent); color: #06121f; border: none;
+    padding: 14px 28px; border-radius: 8px; font-size: 16px;
+    font-weight: 600; cursor: pointer;
+  }
+  .btn:hover { background: #6cb0ff; }
+  .flight {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 0; border-bottom: 1px solid var(--border);
+  }
+  .flight:last-child { border-bottom: none; }
+  .flight-info h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .flight-info p { color: var(--text-dim); font-size: 14px; }
+  .flight-price { text-align: right; }
+  .flight-price .amount { font-size: 22px; font-weight: 600; color: var(--accent); }
+  footer { color: var(--text-dim); font-size: 14px; padding: 40px 0; text-align: center; border-top: 1px solid var(--border); }
+  .task-note {
+    background: var(--accent-soft); border: 1px solid var(--accent);
+    border-radius: 8px; padding: 16px 20px; margin-bottom: 32px; font-size: 15px;
+  }
+</style>
+</head>
+<body>
+<div class="scenario-tag">SCENARIO A — Baseline: calm, low cognitive load</div>
+<header>
+  <div class="wrap">
+    <nav>
+      <div class="logo">SkyBook</div>
+      <ul class="nav-links">
+        <li><a href="#">Flights</a></li>
+        <li><a href="#">Hotels</a></li>
+        <li><a href="#">Trips</a></li>
+        <li><a href="#">Help</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <h1>Find your next flight</h1>
+    <p class="lede">A quiet, focused way to search and book. One task at a time, nothing competing for your attention.</p>
+
+    <div class="task-note">Your task: find the cheapest morning flight from Jakarta to Bali and start booking it.</div>
+
+    <div class="card">
+      <div class="form-row">
+        <div class="field">
+          <label for="from">From</label>
+          <input id="from" type="text" value="Jakarta (CGK)" />
+        </div>
+        <div class="field">
+          <label for="to">To</label>
+          <input id="to" type="text" value="Bali (DPS)" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="date">Departure</label>
+          <input id="date" type="date" value="2026-07-14" />
+        </div>
+        <div class="field">
+          <label for="pax">Passengers</label>
+          <select id="pax"><option>1 adult</option><option>2 adults</option></select>
+        </div>
+      </div>
+      <button class="btn">Search flights</button>
+    </div>
+
+    <div class="card">
+      <div class="flight">
+        <div class="flight-info"><h3>07:10 → 09:00</h3><p>Garuda Indonesia · Direct · 1h 50m</p></div>
+        <div class="flight-price"><div class="amount">Rp 812,000</div></div>
+      </div>
+      <div class="flight">
+        <div class="flight-info"><h3>09:35 → 11:25</h3><p>Citilink · Direct · 1h 50m</p></div>
+        <div class="flight-price"><div class="amount">Rp 749,000</div></div>
+      </div>
+      <div class="flight">
+        <div class="flight-info"><h3>13:20 → 15:15</h3><p>Batik Air · Direct · 1h 55m</p></div>
+        <div class="flight-price"><div class="amount">Rp 905,000</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+<footer><div class="wrap">SkyBook — research prototype · Scenario A</div></footer>
+</body>
+</html>
