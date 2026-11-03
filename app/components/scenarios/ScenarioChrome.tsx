@@ -64,26 +64,26 @@ interface Ad {
 }
 
 const ADS: readonly Ad[] = [
-  { heading: "WINNER!!", body: "You are visitor #1,000,000!", big: "🎉 PRIZE 🎉", cta: "CLAIM NOW", variant: 1 },
-  { heading: "HOT DEAL", body: "Bali villas from Rp 1!", big: "-87%", cta: "GRAB IT", variant: 2 },
-  { heading: "⏰ HURRY", body: "Only minutes left!", big: "BOOK NOW", cta: "BOOK NOW", variant: 3 },
+  { heading: "PEMENANG!!", body: "Anda adalah pengunjung ke-1.000.000!", big: "🎉 HADIAH 🎉", cta: "KLAIM SEKARANG", variant: 1 },
+  { heading: "PENAWARAN PANAS", body: "Vila Bali mulai Rp 1!", big: "-87%", cta: "AMBIL SEKARANG", variant: 2 },
+  { heading: "⏰ SEGERA", body: "Tinggal beberapa menit lagi!", big: "PESAN SEKARANG", cta: "PESAN SEKARANG", variant: 3 },
 ];
 
 /** Modal pop-up content, cycled in order (ported from the prototypes). */
 const POPUPS: readonly { title: string; body: string }[] = [
-  { title: "🎁 WAIT! Don't leave!", body: "Get an EXTRA 50% off if you subscribe RIGHT NOW!" },
-  { title: "📧 JOIN OUR NEWSLETTER", body: "Enter your email for daily deals!" },
-  { title: "🎰 SPIN TO WIN!", body: "You could win a FREE trip! (You will not win.)" },
-  { title: "⚠️ LAST CHANCE!", body: "This deal expires in 3... 2... 1..." },
+  { title: "🎁 TUNGGU! Jangan pergi!", body: "Dapatkan DISKON EKSTRA 50% jika Anda berlangganan SEKARANG JUGA!" },
+  { title: "📧 BERGABUNG NEWSLETTER KAMI", body: "Masukkan email Anda untuk penawaran harian!" },
+  { title: "🎰 PUTAR UNTUK MENANG!", body: "Anda bisa memenangkan perjalanan GRATIS! (Anda tidak akan menang.)" },
+  { title: "⚠️ KESEMPATAN TERAKHIR!", body: "Penawaran ini berakhir dalam 3... 2... 1..." },
 ];
 
 /** Fake social-proof names used by the stacking toasts. */
 const TOAST_NAMES: readonly string[] = [
-  "Andi from Jakarta",
-  "Siti from Bandung",
-  "Budi from Surabaya",
-  "Rina from Medan",
-  "Dewi from Bali",
+  "Andi dari Jakarta",
+  "Siti dari Bandung",
+  "Budi dari Surabaya",
+  "Rina dari Medan",
+  "Dewi dari Bali",
 ];
 
 /** Format a remaining-seconds count as mm:ss. */
@@ -204,20 +204,19 @@ export default function ScenarioChrome({
     <div className="chrome">
       <div className="marquee" aria-hidden="true">
         <span>
-          🔥 MEGA SALE!! 90% OFF EVERYTHING!! LIMITED TIME!! BOOK NOW OR CRY
-          LATER!! 🔥 FREE HOTEL!! FREE CAR!! FREE EVERYTHING!! 🔥
+          🔥 MEGA SALE!! DISKON 90% SEMUA!! WAKTU TERBATAS!! PESAN SEKARANG ATAU MENYESAL!! 🔥 HOTEL GRATIS!! MOBIL GRATIS!! SEMUA GRATIS!! 🔥
         </span>
       </div>
 
       <header className="chrome-header">
         <div className="logo">SkyBook MEGA</div>
         <ul className="nav-links">
-          <li><a href="#">🔥 Flights</a></li>
-          <li><a href="#">💰 Hotels</a></li>
-          <li><a href="#">🎁 Deals</a></li>
+          <li><a href="#">🔥 Penerbangan</a></li>
+          <li><a href="#">💰 Hotel</a></li>
+          <li><a href="#">🎁 Penawaran</a></li>
           <li><a href="#">⭐ VIP</a></li>
-          <li><a href="#">🎰 Lottery</a></li>
-          <li><a href="#">📞 Help</a></li>
+          <li><a href="#">🎰 Lotre</a></li>
+          <li><a href="#">📞 Bantuan</a></li>
           <li><a href="#">💎 Premium</a></li>
         </ul>
       </header>
@@ -247,13 +246,13 @@ export default function ScenarioChrome({
         </div>
       </div>
 
-      <div className="chat" aria-hidden="true">💬 Chat with us NOW!</div>
+      <div className="chat" aria-hidden="true">💬 Chat dengan kami SEKARANG!</div>
 
       {!cookieDismissed && (
-        <div className="cookie" role="region" aria-label="Cookie notice">
-          🍪 We use 10,000 cookies to track EVERYTHING about you!
+        <div className="cookie" role="region" aria-label="Pemberitahuan cookie">
+          🍪 Kami menggunakan 10.000 cookie untuk melacak SEGALANYA tentang Anda!
           <button type="button" onClick={() => setCookieDismissed(true)}>
-            ACCEPT ALL
+            TERIMA SEMUA
           </button>
         </div>
       )}
@@ -283,7 +282,7 @@ export default function ScenarioChrome({
           <button
             type="button"
             className="close"
-            aria-label="Close pop-up"
+            aria-label="Tutup pop-up"
             onClick={() => dismissPopup(p.id)}
           >
             ×
@@ -291,7 +290,7 @@ export default function ScenarioChrome({
           <h2>{p.title}</h2>
           <p>{p.body}</p>
           <button type="button" onClick={() => dismissPopup(p.id)}>
-            No thanks
+            Tidak, terima kasih
           </button>
         </div>
       ))}

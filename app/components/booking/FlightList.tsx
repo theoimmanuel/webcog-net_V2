@@ -80,10 +80,10 @@ export default function FlightList({ onSelect }: FlightListProps) {
     <section aria-labelledby="flight-list-heading" className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h2 id="flight-list-heading" className="text-xl font-semibold">
-          Choose a flight
+          Pilih penerbangan
         </h2>
         <p className="text-sm text-neutral-400">
-          Jakarta (CGK) → Bali (DPS). Select the cheapest morning departure.
+          Jakarta (CGK) → Bali (DPS). Pilih keberangkatan pagi yang paling murah.
         </p>
       </div>
 

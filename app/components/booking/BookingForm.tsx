@@ -54,17 +54,17 @@ interface FieldDef {
 }
 
 const FIELDS: readonly FieldDef[] = [
-  { name: "fullName", label: "Full name", type: "text", autoComplete: "name" },
+  { name: "fullName", label: "Nama lengkap", type: "text", autoComplete: "name" },
   { name: "email", label: "Email", type: "email", autoComplete: "email", inputMode: "email" },
   {
     name: "passengers",
-    label: "Passengers",
+    label: "Penumpang",
     type: "number",
     inputMode: "numeric",
   },
   {
     name: "cardNumber",
-    label: "Card number",
+    label: "Nomor kartu",
     type: "tel",
     autoComplete: "cc-number",
     inputMode: "numeric",
@@ -72,10 +72,10 @@ const FIELDS: readonly FieldDef[] = [
   },
   {
     name: "cardExpiry",
-    label: "Expiry (MM/YY)",
+    label: "Kadaluarsa (BB/TT)",
     type: "text",
     autoComplete: "cc-exp",
-    placeholder: "MM/YY",
+    placeholder: "BB/TT",
   },
   {
     name: "cardCvc",
@@ -101,39 +101,39 @@ export function validateBookingForm(values: BookingFormValues): FieldErrors {
   const errors: FieldErrors = {};
 
   if (values.fullName.trim() === "") {
-    errors.fullName = "Enter the passenger's full name.";
+    errors.fullName = "Masukkan nama lengkap penumpang.";
   }
 
   if (values.email.trim() === "") {
-    errors.email = "Enter an email address.";
+    errors.email = "Masukkan alamat email.";
   } else if (!EMAIL_RE.test(values.email.trim())) {
-    errors.email = "Enter a valid email address.";
+    errors.email = "Masukkan alamat email yang valid.";
   }
 
   const passengers = Number(values.passengers);
   if (values.passengers.trim() === "") {
-    errors.passengers = "Enter the number of passengers.";
+    errors.passengers = "Masukkan jumlah penumpang.";
   } else if (!Number.isInteger(passengers) || passengers < 1) {
-    errors.passengers = "Passengers must be a whole number of 1 or more.";
+    errors.passengers = "Jumlah penumpang harus bilangan bulat minimal 1.";
   }
 
   const card = values.cardNumber.replace(/\s+/g, "");
   if (values.cardNumber.trim() === "") {
-    errors.cardNumber = "Enter the card number.";
+    errors.cardNumber = "Masukkan nomor kartu.";
   } else if (!CARD_RE.test(card)) {
-    errors.cardNumber = "Enter a valid card number (digits only).";
+    errors.cardNumber = "Masukkan nomor kartu yang valid (hanya angka).";
   }
 
   if (values.cardExpiry.trim() === "") {
-    errors.cardExpiry = "Enter the card expiry.";
+    errors.cardExpiry = "Masukkan tanggal kadaluarsa kartu.";
   } else if (!EXPIRY_RE.test(values.cardExpiry.trim())) {
-    errors.cardExpiry = "Use MM/YY format.";
+    errors.cardExpiry = "Gunakan format BB/TT.";
   }
 
   if (values.cardCvc.trim() === "") {
-    errors.cardCvc = "Enter the card CVC.";
+    errors.cardCvc = "Masukkan CVC kartu.";
   } else if (!CVC_RE.test(values.cardCvc.trim())) {
-    errors.cardCvc = "CVC must be 3 or 4 digits.";
+    errors.cardCvc = "CVC harus terdiri dari 3 atau 4 angka.";
   }
 
   return errors;
@@ -178,7 +178,7 @@ export default function BookingForm({ flight, onSubmit }: BookingFormProps) {
     <section aria-labelledby="booking-form-heading" className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h2 id="booking-form-heading" className="text-xl font-semibold">
-          Passenger &amp; payment details
+          Detail penumpang &amp; pembayaran
         </h2>
         <p className="text-sm text-neutral-400">
           {flight.airline} ({flight.id}) · {flight.from} {flight.departure} →{" "}
@@ -192,7 +192,7 @@ export default function BookingForm({ flight, onSubmit }: BookingFormProps) {
           data-testid="form-error-summary"
           className="rounded-md border border-red-500/60 bg-red-500/10 px-4 py-3 text-sm text-red-200"
         >
-          <p className="font-medium">Please fix the following:</p>
+          <p className="font-medium">Harap perbaiki hal berikut:</p>
           <ul className="mt-1 list-inside list-disc">
             {errorEntries.map(([name, message]) => (
               <li key={name}>
@@ -242,7 +242,7 @@ export default function BookingForm({ flight, onSubmit }: BookingFormProps) {
           type="submit"
           className="mt-2 inline-flex w-fit items-center rounded-md bg-neutral-100 px-5 py-2.5 text-sm font-semibold text-neutral-900 transition hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300"
         >
-          Confirm booking
+          Konfirmasi pemesanan
         </button>
       </form>
     </section>

@@ -49,28 +49,28 @@ export default function Confirmation({ flight, booking, onComplete }: Confirmati
     >
       <div className="flex flex-col gap-1">
         <h2 id="confirmation-heading" className="text-xl font-semibold text-emerald-300">
-          Booking confirmed
+          Pemesanan dikonfirmasi
         </h2>
         <p className="text-sm text-neutral-400">
-          Your flight is booked. A confirmation has been sent to {booking.email}.
+          Penerbangan Anda telah dipesan. Konfirmasi telah dikirim ke {booking.email}.
         </p>
       </div>
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-4 text-sm">
-        <dt className="text-neutral-400">Passenger</dt>
+        <dt className="text-neutral-400">Penumpang</dt>
         <dd className="text-neutral-100">{booking.fullName}</dd>
 
-        <dt className="text-neutral-400">Flight</dt>
+        <dt className="text-neutral-400">Penerbangan</dt>
         <dd className="text-neutral-100">
           {flight.airline} ({flight.id})
         </dd>
 
-        <dt className="text-neutral-400">Route</dt>
+        <dt className="text-neutral-400">Rute</dt>
         <dd className="text-neutral-100">
           {flight.from} {flight.departure} → {flight.to} {flight.arrival}
         </dd>
 
-        <dt className="text-neutral-400">Passengers</dt>
+        <dt className="text-neutral-400">Penumpang</dt>
         <dd className="text-neutral-100">{booking.passengers}</dd>
 
         <dt className="text-neutral-400">Total</dt>

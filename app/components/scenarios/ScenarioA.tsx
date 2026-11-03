@@ -42,10 +42,10 @@ export default function ScenarioA({ onComplete, onAbandon }: ScenarioAProps) {
           </div>
           <nav aria-label="Primary">
             <ul className="flex list-none gap-7 text-[15px] text-[#9aa7b4]">
-              <li><a href="#" className="hover:text-[#e6edf3]">Flights</a></li>
-              <li><a href="#" className="hover:text-[#e6edf3]">Hotels</a></li>
-              <li><a href="#" className="hover:text-[#e6edf3]">Trips</a></li>
-              <li><a href="#" className="hover:text-[#e6edf3]">Help</a></li>
+              <li><a href="#" className="hover:text-[#e6edf3]">Penerbangan</a></li>
+              <li><a href="#" className="hover:text-[#e6edf3]">Hotel</a></li>
+              <li><a href="#" className="hover:text-[#e6edf3]">Perjalanan</a></li>
+              <li><a href="#" className="hover:text-[#e6edf3]">Bantuan</a></li>
             </ul>
           </nav>
         </div>
@@ -54,19 +54,19 @@ export default function ScenarioA({ onComplete, onAbandon }: ScenarioAProps) {
       <main className="py-14">
         <div className="mx-auto max-w-[880px] px-8">
           <h1 className="mb-3 text-[30px] font-semibold leading-tight">
-            Find your next flight
+            Temukan penerbangan Anda berikutnya
           </h1>
           <p className="mb-10 max-w-[620px] leading-relaxed text-[#9aa7b4]">
-            A quiet, focused way to search and book. One task at a time, nothing
-            competing for your attention.
+            Cara yang tenang dan fokus untuk mencari dan memesan. Satu tugas
+            sekaligus, tanpa gangguan untuk perhatian Anda.
           </p>
 
           <div
             role="note"
             className="mb-8 rounded-lg border border-[#4a9eff] bg-[#1e3a5f] px-5 py-4 text-[15px]"
           >
-            Your task: find the cheapest morning flight from Jakarta to Bali and
-            start booking it.
+            Tugas Anda: temukan penerbangan pagi termurah dari Jakarta ke Bali
+            dan mulai pemesanan.
           </div>
 
           <BookingTask

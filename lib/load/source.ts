@@ -82,6 +82,11 @@ export interface LoadSample {
   degraded: boolean;
   /** True when produced by the Simulated_Trigger (Req 5.4). */
   simulated: boolean;
+  /**
+   * True/false on webcam samples: whether the most recent processed frame
+   * contained a face (Req 2.7–2.9). Undefined on simulated samples.
+   */
+  faceDetected?: boolean;
 }
 
 /** Callback invoked with each emitted sample. */

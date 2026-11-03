@@ -44,12 +44,7 @@ import {
   type StudyRecord,
   type StudySession,
 } from "@/lib/harness/session";
-import {
-  assignOrder,
-  isValidOrder,
-  orderKey,
-  allOrders,
-} from "@/lib/harness/latinSquare";
+import { isValidOrder } from "@/lib/harness/latinSquare";
 import {
   createSessionEpoch,
   type SessionEpoch,
@@ -63,6 +58,7 @@ import {
   type SimulatedTrigger,
 } from "@/lib/load/simulated";
 import {
+  createMediaPipeFaceLandmarker,
   createVisionPipeline,
   type WebcamVisionPipeline,
 } from "@/lib/vision/pipeline";
@@ -70,12 +66,10 @@ import { createClassifier, type CnnGruClassifier } from "@/lib/vision/classifier
 import { installNetworkGuard } from "@/lib/privacy/network-guard";
 
 /**
- * The `localStorage` key under which the Latin-Square assignment tally is kept.
- * The tally persists ACROSS sessions (unlike the `sessionStorage` session
- * mirror) so counterbalancing stays balanced within ±1 across participants
- * (Req 12.1). Keyed by `orderKey` (e.g. "ABC").
+ * The scenario order every participant receives. The study runs strictly
+ * A → B → C (Latin-Square counterbalancing is no longer used).
  */
-const TALLY_STORAGE_KEY = "webcog-net:order-tally";
+export const FIXED_SCENARIO_ORDER: ScenarioOrder = ["A", "B", "C"];
 
 /** The phases of the harness state machine (explicit for testability). */
 export type StudyPhase = "consent" | "scenario" | "tlx" | "done" | "error";
@@ -100,9 +94,9 @@ export interface StudyContextValue {
   simulated: SimulatedTrigger | null;
 
   /**
-   * Grant consent (Req 2.3, 2.4) and START the session: assign the scenario
-   * order via the balanced Latin-Square tally and record it with the
-   * participant/session ids BEFORE the first scenario (Req 12.1, 12.3). An
+   * Grant consent (Req 2.3, 2.4) and START the session: assign the fixed
+   * A → B → C scenario order and record it with the participant/session ids
+   * BEFORE the first scenario (Req 12.3). An
    * invalid assigned order leaves the session unstarted and sets `error`
    * (Req 12.5).
    */
@@ -152,41 +146,6 @@ export const WEBCAM_REQUIRED_MESSAGE =
 export const INVALID_ORDER_MESSAGE =
   "The assigned scenario order was invalid, so the study could not start.";
 
-/** Read the persisted Latin-Square tally from `localStorage` (browser-only). */
-function readTally(): Record<string, number> {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(TALLY_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null) return {};
-    const out: Record<string, number> = {};
-    for (const o of allOrders()) {
-      const key = orderKey(o);
-      const value = (parsed as Record<string, unknown>)[key];
-      if (typeof value === "number" && Number.isFinite(value) && value > 0) {
-        out[key] = value;
-      }
-    }
-    return out;
-  } catch {
-    return {};
-  }
-}
-
-/** Increment and persist the tally for the given order (browser-only). */
-function bumpTally(order: ScenarioOrder): void {
-  if (typeof window === "undefined") return;
-  try {
-    const tally = readTally();
-    const key = orderKey(order);
-    tally[key] = (tally[key] ?? 0) + 1;
-    window.localStorage.setItem(TALLY_STORAGE_KEY, JSON.stringify(tally));
-  } catch {
-    // Tally persistence is best-effort; a failure only affects balancing.
-  }
-}
-
 /** Generate an id using `crypto.randomUUID` when available, else a fallback. */
 function generateId(prefix: string): string {
   const c = (globalThis as { crypto?: Crypto }).crypto;
@@ -199,9 +158,17 @@ function generateId(prefix: string): string {
 
 export interface StudyProviderProps {
   children: ReactNode;
+  /**
+   * Scenario order to assign at consent. Defaults to the fixed A → B → C
+   * order; only tests override it (e.g. to start directly on Scenario C).
+   */
+  scenarioOrder?: ScenarioOrder;
 }
 
-export function StudyProvider({ children }: StudyProviderProps) {
+export function StudyProvider({
+  children,
+  scenarioOrder = FIXED_SCENARIO_ORDER,
+}: StudyProviderProps) {
   // Browser-only singletons, created once in an effect after mount so SSR never
   // touches crypto / sessionStorage / the network guard.
   const storeRef = useRef<SessionStore | null>(null);
@@ -268,11 +235,9 @@ export function StudyProvider({ children }: StudyProviderProps) {
       // Grant consent first so the gated writes below are permitted (Req 2.3).
       store.grantConsent(timestamp);
 
-      // SESSION START: assign the counterbalanced order from the persisted
-      // tally (Req 12.1) and record it with participant/session ids BEFORE the
-      // first scenario is presented (Req 12.3).
-      const tally = readTally();
-      const assigned = assignOrder(tally);
+      // SESSION START: assign the fixed A → B → C order and record it with the
+      // participant/session ids BEFORE the first scenario is presented (Req 12.3).
+      const assigned: ScenarioOrder = [...scenarioOrder] as ScenarioOrder;
 
       // Validate the assigned order; an invalid order leaves the session
       // unstarted and surfaces an error (Req 12.5).
@@ -289,13 +254,10 @@ export function StudyProvider({ children }: StudyProviderProps) {
         return;
       }
 
-      // Only bump the shared tally once the order is actually committed, so a
-      // rejected assignment never skews future counterbalancing.
-      bumpTally(assigned);
       setError(null);
       refresh();
     },
-    [refresh],
+    [refresh, scenarioOrder],
   );
 
   const setRecord = useCallback(
@@ -329,6 +291,10 @@ export function StudyProvider({ children }: StudyProviderProps) {
     // not started here — the caller starts it so denial handling is explicit.
     const pipeline = createVisionPipeline({
       classifier,
+      // Real face landmark source (Req 2.1). Resolved lazily inside start()
+      // after camera permission + classifier load, so this stays synchronous
+      // and a load failure follows the WebcamUnavailableError path (Req 2.5).
+      landmarkerFactory: () => createMediaPipeFaceLandmarker(),
       onFallbackToSimulated: () => {
         // Sustained face loss falls back to simulated (Req 3.7); explicit
         // denial is handled separately via endForWebcamDenied (Req 2.7).

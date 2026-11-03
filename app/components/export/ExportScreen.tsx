@@ -105,8 +105,8 @@ const FORMAT_META: Record<
   ExportFormat,
   { label: string; mimeType: string; extension: string }
 > = {
-  csv: { label: "Export CSV", mimeType: "text/csv", extension: "csv" },
-  json: { label: "Export JSON", mimeType: "application/json", extension: "json" },
+  csv: { label: "Ekspor CSV", mimeType: "text/csv", extension: "csv" },
+  json: { label: "Ekspor JSON", mimeType: "application/json", extension: "json" },
 };
 
 /**
@@ -192,7 +192,7 @@ export default function ExportScreen({ session: provided }: ExportScreenProps) {
       setError(null);
     } catch {
       setError(
-        `The ${FORMAT_META[format].label} did not complete. Your collected study data is unchanged — you can try the export again.`,
+        `${FORMAT_META[format].label} tidak berhasil diselesaikan. Data studi yang terkumpul tidak berubah — Anda dapat mencoba ekspor lagi.`,
       );
     }
   }
@@ -205,16 +205,17 @@ export default function ExportScreen({ session: provided }: ExportScreenProps) {
       >
         <header className="flex flex-col gap-3">
           <p className="text-sm font-medium uppercase tracking-widest text-neutral-400">
-            Study data
+            Data studi
           </p>
           <h1 id="export-heading" className="text-3xl font-semibold sm:text-4xl">
-            Export collected data
+            Ekspor data yang terkumpul
           </h1>
           <p className="text-neutral-300">
-            Download every collected measure — task completion time, the six
-            NASA-TLX scores, inference latency, and model size — as CSV or JSON.
-            Exports include the assigned scenario order and the consent
-            timestamp, and never contain raw video or biometric imagery.
+            Unduh semua ukuran yang dikumpulkan — waktu penyelesaian tugas, enam
+            skor NASA-TLX, latensi inferensi, dan ukuran model — sebagai CSV
+            atau JSON. Ekspor mencakup urutan skenario yang ditetapkan dan
+            stempel waktu persetujuan, serta tidak pernah berisi rekaman video
+            mentah atau citra biometrik.
           </p>
         </header>
 
@@ -224,8 +225,8 @@ export default function ExportScreen({ session: provided }: ExportScreenProps) {
             aria-live="polite"
             className="rounded-lg border border-amber-900/60 bg-amber-950/30 p-4 text-amber-100/90"
           >
-            No records were available. The export will contain only the field
-            headers (CSV) or an empty list (JSON).
+            Tidak ada catatan yang tersedia. Ekspor hanya akan berisi header
+            kolom (CSV) atau daftar kosong (JSON).
           </p>
         ) : null}
 
@@ -242,7 +243,7 @@ export default function ExportScreen({ session: provided }: ExportScreenProps) {
           <button
             type="button"
             onClick={() => handleExport("csv")}
-            aria-label="Export collected study data as a CSV file"
+            aria-label="Ekspor data studi yang terkumpul sebagai file CSV"
             className="inline-flex items-center justify-center rounded-md bg-neutral-100 px-5 py-3 text-sm font-semibold text-neutral-900 transition hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
             {FORMAT_META.csv.label}
@@ -250,7 +251,7 @@ export default function ExportScreen({ session: provided }: ExportScreenProps) {
           <button
             type="button"
             onClick={() => handleExport("json")}
-            aria-label="Export collected study data as a JSON file"
+            aria-label="Ekspor data studi yang terkumpul sebagai file JSON"
             className="inline-flex items-center justify-center rounded-md border border-neutral-700 px-5 py-3 text-sm font-semibold text-neutral-200 transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
             {FORMAT_META.json.label}
@@ -258,8 +259,8 @@ export default function ExportScreen({ session: provided }: ExportScreenProps) {
         </div>
 
         <p className="text-sm text-neutral-500">
-          Exports are generated entirely in your browser from data held on this
-          device. Nothing is uploaded.
+          Ekspor dihasilkan sepenuhnya di browser Anda dari data yang tersimpan
+          di perangkat ini. Tidak ada yang diunggah.
         </p>
       </section>
     </main>

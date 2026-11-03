@@ -47,15 +47,15 @@ export default function ScenarioB({
     <div data-scenario="B" className="min-h-screen bg-[#f4ead2]">
       <ScenarioChrome animated={animated}>
         <h1 className="mb-2 text-2xl font-black text-[#8a1a1a]">
-          ✈️ FIND YOUR FLIGHT (BEST PRICES GUARANTEED!!!) ✈️
+          ✈️ TEMUKAN PENERBANGAN ANDA (HARGA TERBAIK DIJAMIN!!!) ✈️
         </h1>
 
         <div
           role="note"
           className="mb-3 border-2 border-dotted border-[#f1c40f] bg-[#2a2a2a] px-3 py-2 font-bold text-[#f1c40f]"
         >
-          YOUR TASK: find the cheapest morning flight Jakarta → Bali and start
-          booking it.
+          TUGAS ANDA: temukan penerbangan pagi termurah Jakarta → Bali dan mulai
+          pemesanan.
         </div>
 
         <BookingTask

@@ -29,16 +29,16 @@ const PROCESSED_SIGNALS: ReadonlyArray<{ name: string; description: string }> = 
   {
     name: "Eye Aspect Ratio (EAR)",
     description:
-      "A unitless ratio of eye-landmark distances used to gauge eye openness.",
+      "Rasio tak berdimensi dari jarak landmark mata yang digunakan untuk mengukur keterbukaan mata.",
   },
   {
-    name: "Blink Rate",
-    description: "The number of detected blinks per minute, derived from EAR.",
+    name: "Laju Kedip (Blink Rate)",
+    description: "Jumlah kedipan yang terdeteksi per menit, diturunkan dari EAR.",
   },
   {
-    name: "Saccade Velocity",
+    name: "Kecepatan Sakade (Saccade Velocity)",
     description:
-      "The angular speed of rapid eye movements, in degrees per second.",
+      "Kecepatan sudut gerakan mata cepat, dalam derajat per detik.",
   },
 ];
 
@@ -92,10 +92,10 @@ export default function ConsentScreen({
       >
         <header className="flex flex-col gap-3">
           <p className="text-sm font-medium uppercase tracking-widest text-neutral-400">
-            Informed consent
+            Persetujuan yang diinformasikan
           </p>
           <h1 id={headingId} className="text-3xl font-semibold sm:text-4xl">
-            Before you begin
+            Sebelum Anda mulai
           </h1>
         </header>
 
@@ -104,15 +104,16 @@ export default function ConsentScreen({
             id={purposeId}
             className="text-lg font-semibold text-neutral-100"
           >
-            Study purpose
+            Tujuan studi
           </h2>
           <p className="text-neutral-300">
-            This study investigates whether an adaptive web interface that
-            declutters itself in response to detected cognitive load reduces your
-            perceived workload and task completion time compared with a calm
-            baseline and a static high-clutter interface. You will complete the
-            same flight-booking task in three interface conditions and rate your
-            workload after each.
+            Studi ini menginvestigasi apakah antarmuka web adaptif yang
+            menyederhanakan tampilan sebagai respons terhadap beban kognitif
+            yang terdeteksi dapat mengurangi beban kerja yang dirasakan dan
+            waktu penyelesaian tugas dibandingkan dengan baseline yang tenang
+            dan antarmuka dengan banyak gangguan statis. Anda akan menyelesaikan
+            tugas pemesanan penerbangan yang sama dalam tiga kondisi antarmuka
+            dan menilai beban kerja Anda setelah masing-masing kondisi.
           </p>
         </section>
 
@@ -121,11 +122,11 @@ export default function ConsentScreen({
             id={signalsId}
             className="text-lg font-semibold text-neutral-100"
           >
-            What is measured
+            Yang diukur
           </h2>
           <p className="text-neutral-300">
-            With your consent, your webcam is used to compute three processed
-            signals from your facial landmarks in real time:
+            Dengan persetujuan Anda, kamera web digunakan untuk menghitung tiga
+            sinyal yang telah diproses dari landmark wajah Anda secara real time:
           </p>
           <ul className="flex flex-col gap-3">
             {PROCESSED_SIGNALS.map((signal) => (
@@ -148,13 +149,14 @@ export default function ConsentScreen({
             id={privacyId}
             className="text-lg font-semibold text-emerald-200"
           >
-            Privacy by design
+            Privasi sejak desain
           </h2>
           <p className="text-emerald-100/90">
-            All computer vision and inference run entirely in your browser. No
-            raw video and no biometric imagery is ever stored or transmitted to
-            any server. Only the three processed signals above and your task
-            results are kept, and they stay on this device.
+            Semua proses computer vision dan inferensi berjalan sepenuhnya di
+            browser Anda. Tidak ada rekaman video mentah dan tidak ada citra
+            biometrik yang pernah disimpan atau dikirimkan ke server mana pun.
+            Hanya tiga sinyal yang telah diproses di atas dan hasil tugas Anda
+            yang disimpan, dan semuanya tetap berada di perangkat ini.
           </p>
         </section>
 
@@ -164,20 +166,20 @@ export default function ConsentScreen({
             onClick={handleGrant}
             className="inline-flex items-center justify-center rounded-md bg-neutral-100 px-5 py-3 text-sm font-semibold text-neutral-900 transition hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
-            I consent — begin the study
+            Saya setuju — mulai studi
           </button>
           <button
             type="button"
             onClick={handleDecline}
             className="inline-flex items-center justify-center rounded-md border border-neutral-700 px-5 py-3 text-sm font-semibold text-neutral-200 transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
-            Decline
+            Tolak
           </button>
         </div>
 
         <p className="text-sm text-neutral-500">
-          Your webcam is only requested after you consent. Declining ends the
-          session and never requests webcam access.
+          Kamera web hanya diminta setelah Anda memberikan persetujuan. Menolak
+          mengakhiri sesi dan tidak pernah meminta akses kamera.
         </p>
       </section>
     </main>

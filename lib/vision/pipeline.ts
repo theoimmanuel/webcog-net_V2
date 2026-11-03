@@ -147,6 +147,14 @@ export type FallbackHandler = () => void;
 export interface VisionPipelineOptions {
   /** FaceMesh landmarker. Required in tests; defaults to a tasks-vision one in the browser. */
   landmarker?: FaceLandmarker;
+  /**
+   * Async FaceMesh landmarker factory (e.g. `createMediaPipeFaceLandmarker`).
+   * Awaited once inside `start()` — before the capture loop begins — and ONLY
+   * when no explicit `landmarker` was injected. An explicit `landmarker` always
+   * wins and the factory is never consulted. A factory rejection is surfaced as
+   * a {@link WebcamUnavailableError} (same path as a classifier-load failure).
+   */
+  landmarkerFactory?: () => Promise<FaceLandmarker>;
   /** Pre-built aggregator (defaults to a fresh trailing 5s / 1s-step aggregator). */
   aggregator?: FeatureAggregator;
   /** Classifier instance (defaults to the shipped TF.js CNN-GRU classifier). */
@@ -246,7 +254,9 @@ export class WebcamVisionPipeline implements VisionPipeline {
   private requestFrame: RequestFrame;
   private cancelFrame: CancelFrame;
 
-  private readonly landmarker: FaceLandmarker | null;
+  /** Resolved lazily in start() from `landmarkerFactory` when not injected. */
+  private landmarker: FaceLandmarker | null;
+  private readonly landmarkerFactory?: () => Promise<FaceLandmarker>;
 
   private video: HTMLVideoElement | null;
   private canvas: HTMLCanvasElement | null;
@@ -266,6 +276,12 @@ export class WebcamVisionPipeline implements VisionPipeline {
   private lastFaceT: number | null = null;
   /** True once sustained-loss fallback has fired, so it fires only once. */
   private fellBackToSimulated = false;
+  /**
+   * Face-seen result of the most recently processed frame (Req 2.7–2.9). Only a
+   * boolean is retained — no frame/derived-image reference (Req 3.3). Emitted as
+   * `faceDetected` on each webcam sample; throttled frames leave it unchanged.
+   */
+  private lastFrameFaceSeen = false;
 
   constructor(options: VisionPipelineOptions = {}) {
     this.aggregator = options.aggregator ?? createFeatureAggregator({ stepMs: WINDOW_STEP_MS });
@@ -274,6 +290,7 @@ export class WebcamVisionPipeline implements VisionPipeline {
     this.clock = options.clock ?? defaultClock;
     this.onFallbackToSimulated = options.onFallbackToSimulated;
     this.landmarker = options.landmarker ?? null;
+    this.landmarkerFactory = options.landmarkerFactory;
 
     this.getUserMedia =
       options.getUserMedia ??
@@ -349,6 +366,24 @@ export class WebcamVisionPipeline implements VisionPipeline {
       throw wrapped;
     }
 
+    // Resolve the FaceMesh landmarker lazily (once) when none was injected, so
+    // the capture loop never runs on a null landmarker in live capture. An
+    // explicit `landmarker` always wins. A factory failure mirrors the
+    // classifier-load failure path: release the stream, wrap, notify, reject.
+    if (this.landmarker === null && this.landmarkerFactory) {
+      try {
+        this.landmarker = await this.landmarkerFactory();
+      } catch (err) {
+        this.releaseStream();
+        const wrapped = new WebcamUnavailableError(
+          "FaceMesh landmarker failed to load",
+          err,
+        );
+        this.notifyError(wrapped);
+        throw wrapped;
+      }
+    }
+
     // Attach the stream to the video element and begin playback so the frame
     // scheduler has presented frames to work with.
     if (this.video) {
@@ -374,6 +409,7 @@ export class WebcamVisionPipeline implements VisionPipeline {
     this.nextWindowT = null;
     this.lastFaceT = null;
     this.fellBackToSimulated = false;
+    this.lastFrameFaceSeen = false;
 
     this.scheduleNext();
   }
@@ -439,6 +475,9 @@ export class WebcamVisionPipeline implements VisionPipeline {
     this.lastFrameT = t;
 
     const faceSeen = this.processFrame(t);
+    // Record before advancing the window so a sample emitted this tick reflects
+    // this frame's face-visibility (Req 2.7, 2.8).
+    this.lastFrameFaceSeen = faceSeen;
     this.updateFaceLoss(faceSeen, t);
     this.maybeAdvanceWindow(t);
 
@@ -572,6 +611,7 @@ export class WebcamVisionPipeline implements VisionPipeline {
       timestamp: this.clock(),
       degraded: window.degraded,
       simulated: false,
+      faceDetected: this.lastFrameFaceSeen,
     };
     this.emitter.emit(sample);
   }

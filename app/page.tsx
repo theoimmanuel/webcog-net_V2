@@ -5,14 +5,14 @@ export default function Home() {
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center gap-8 px-6 py-16">
       <header className="flex flex-col gap-4">
         <p className="text-sm font-medium uppercase tracking-widest text-neutral-400">
-          Adaptive interface research
+          Penelitian antarmuka adaptif
         </p>
         <h1 className="text-4xl font-semibold sm:text-5xl">WebCog-Net</h1>
         <p className="max-w-2xl text-lg text-neutral-300">
-          A cognitive-load-aware web interface that declutters itself in
-          response to detected workload. Everything — computer vision,
-          inference, and adaptive logic — runs entirely in your browser under a
-          Privacy-by-Design model.
+          Antarmuka web yang sadar beban kognitif dan mampu menyederhanakan
+          tampilan sebagai respons terhadap beban kerja yang terdeteksi. Semua
+          proses — computer vision, inferensi, dan logika adaptif — berjalan
+          sepenuhnya di browser Anda dengan model Privasi-sejak-Desain.
         </p>
       </header>
 
@@ -21,11 +21,11 @@ export default function Home() {
           href="/study"
           className="inline-flex w-fit items-center rounded-md bg-neutral-100 px-5 py-3 text-sm font-semibold text-neutral-900 transition hover:bg-white"
         >
-          Enter the study
+          Masuk ke studi
         </Link>
         <p className="text-sm text-neutral-500">
-          You will be asked for informed consent before any data collection or
-          webcam access.
+          Anda akan diminta memberikan persetujuan yang diinformasikan sebelum
+          pengumpulan data atau akses kamera.
         </p>
       </section>
     </main>

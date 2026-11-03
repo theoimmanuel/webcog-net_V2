@@ -19,6 +19,11 @@
 // A persistent "SIMULATED INPUT ACTIVE" indicator is shown whenever the latest
 // sample has `simulated: true` (Req 5.4).
 //
+// Face_Indicator: for webcam (non-simulated) samples, a status banner shows
+// "✓ FACE DETECTED" or "⚠ NO FACE DETECTED — please face the camera" based on
+// `sample.faceDetected`, so the researcher can tell a missing face apart from a
+// genuinely LOW load. It is absent for simulated samples (faceDetected undefined).
+//
 // Controls (Req 9.4): a Simulated_Trigger control (LOW/MODERATE/HIGH buttons
 // wired to `onSimulate` -> SimulatedTrigger.set), a force-declutter control
 // (`onForceDeclutter` -> InterventionEngine.forceDeclutter, Req 9.5), and a reset
@@ -169,6 +174,9 @@ export default function MonitorHUD({
 
   const state = sample?.state;
   const simulated = sample?.simulated ?? false;
+  // Face_Indicator source: only webcam samples carry a face signal (Req 2.7, 2.8, 3.7).
+  const faceDetected =
+    sample && !sample.simulated ? sample.faceDetected : undefined;
 
   return (
     <section
@@ -182,7 +190,7 @@ export default function MonitorHUD({
       <h3
         onPointerDown={onDragStart}
         className="mb-2.5 flex touch-none cursor-grab items-center gap-1.5 text-sm font-semibold text-sky-400 active:cursor-grabbing"
-        title="Drag to move"
+        title="Seret untuk memindahkan"
       >
         <span
           aria-hidden="true"
@@ -224,6 +232,23 @@ export default function MonitorHUD({
         {state ? `LOAD: ${state}` : "LOAD: —"}
       </div>
 
+      {/* Face_Indicator — icon + text, one element whose text changes (Req 2.7, 2.8). */}
+      {faceDetected !== undefined && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`my-2 rounded-md border py-1 text-center text-[11px] font-bold uppercase tracking-wide ${
+            faceDetected
+              ? "border-emerald-500/50 bg-emerald-950 text-emerald-400"
+              : "border-amber-500/50 bg-amber-950 text-amber-400"
+          }`}
+        >
+          {faceDetected
+            ? "✓ WAJAH TERDETEKSI"
+            : "⚠ WAJAH TIDAK TERDETEKSI — harap hadapkan kamera"}
+        </div>
+      )}
+
       {/* Stale indicator — retains last values while visible (Req 9.3, Property 22). */}
       {stale && (
         <div
@@ -231,7 +256,7 @@ export default function MonitorHUD({
           aria-live="polite"
           className="my-2 rounded-md border border-amber-500/50 bg-amber-950 py-1 text-center text-[11px] font-bold uppercase tracking-wide text-amber-400"
         >
-          ⚠ STALE — no recent cycle
+          ⚠ KEDALUWARSA — tidak ada siklus terbaru
         </div>
       )}
 
@@ -241,14 +266,14 @@ export default function MonitorHUD({
           role="status"
           className="my-2 rounded-md border border-sky-500/50 bg-sky-950 py-1 text-center text-[11px] font-bold uppercase tracking-wide text-sky-300"
         >
-          SIMULATED INPUT ACTIVE
+          SIMULASI INPUT AKTIF
         </div>
       )}
 
       {/* Simulated_Trigger control (Req 9.4). */}
       <fieldset className="mt-3 border-0 p-0">
         <legend className="mb-1 block text-[11px] text-slate-400">
-          Simulated trigger
+          Pemicu simulasi
         </legend>
         <div className="flex gap-1.5">
           {COGNITIVE_LOAD_STATES.map((s) => (
@@ -271,7 +296,7 @@ export default function MonitorHUD({
           onClick={onForceDeclutter}
           className="flex-1 cursor-pointer rounded-md border border-slate-700 bg-[#1e3a5f] px-2 py-1.5 text-xs text-slate-200 hover:bg-[#2a4e7a]"
         >
-          Force declutter
+          Paksa penyederhanaan
         </button>
         <button
           type="button"
@@ -283,8 +308,8 @@ export default function MonitorHUD({
       </div>
 
       <p className="mt-2 text-[11px] leading-snug text-slate-500">
-        Auto-declutters when load stays HIGH for ~3s. The real signal comes from
-        the on-device CNN-GRU over a 5s window.
+        Penyederhanaan otomatis saat beban tinggi selama ~3 detik. Sinyal asli
+        berasal dari CNN-GRU on-device dalam jendela 5 detik.
       </p>
     </section>
   );

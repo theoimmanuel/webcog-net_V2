@@ -262,7 +262,7 @@ export default function HarnessRunPage() {
           className="flex flex-col gap-4 rounded-xl border border-red-900/60 bg-red-950/40 p-8 text-center shadow-lg"
         >
           <h1 className="text-2xl font-semibold text-red-100">
-            The study has ended
+            Studi telah berakhir
           </h1>
           <p className="text-red-100/90">{error}</p>
         </section>
@@ -281,12 +281,12 @@ export default function HarnessRunPage() {
           className="flex flex-col gap-3 rounded-xl border border-neutral-800 bg-neutral-950/60 p-8 text-center shadow-lg"
         >
           <h1 className="text-2xl font-semibold text-neutral-100">
-            Preparing the study
+            Mempersiapkan studi
           </h1>
           <p className="text-neutral-300">
             {consentGranted
-              ? "Setting up the first scenario…"
-              : "Please start from the consent screen to begin."}
+              ? "Menyiapkan skenario pertama…"
+              : "Silakan mulai dari layar persetujuan untuk memulai."}
           </p>
         </section>
       </main>
@@ -302,9 +302,9 @@ export default function HarnessRunPage() {
           className="flex flex-col gap-3 rounded-xl border border-neutral-800 bg-neutral-950/60 p-8 text-center shadow-lg"
         >
           <h1 className="text-2xl font-semibold text-neutral-100">
-            All scenarios complete
+            Semua skenario selesai
           </h1>
-          <p className="text-neutral-300">Taking you to the data export…</p>
+          <p className="text-neutral-300">Membawa Anda ke ekspor data…</p>
         </section>
       </main>
     );

@@ -59,12 +59,13 @@ export class StudyErrorBoundary extends Component<
             className="flex flex-col gap-4 rounded-xl border border-red-900/60 bg-red-950/40 p-8 text-center shadow-lg"
           >
             <h1 className="text-2xl font-semibold text-red-100">
-              Something went wrong
+              Terjadi kesalahan
             </h1>
             <p className="text-red-100/90">
-              The study hit an unexpected error. Your webcam has been turned off
-              and the data collected so far is kept safely in this browser
-              session. You can reload the page to continue the export.
+              Studi mengalami kesalahan yang tidak terduga. Kamera web Anda
+              telah dimatikan dan data yang terkumpul sejauh ini disimpan
+              dengan aman di sesi browser ini. Anda dapat memuat ulang halaman
+              untuk melanjutkan ekspor.
             </p>
           </section>
         </main>

@@ -54,49 +54,49 @@ interface DimensionDef {
 const DIMENSION_DEFS: readonly DimensionDef[] = [
   {
     key: "mental",
-    label: "Mental Demand",
-    description: "How mentally demanding was the task?",
-    lowAnchor: "Very Low",
-    highAnchor: "Very High",
+    label: "Tuntutan Mental",
+    description: "Seberapa berat tuntutan mental dari tugas ini?",
+    lowAnchor: "Sangat Rendah",
+    highAnchor: "Sangat Tinggi",
   },
   {
     key: "physical",
-    label: "Physical Demand",
-    description: "How physically demanding was the task?",
-    lowAnchor: "Very Low",
-    highAnchor: "Very High",
+    label: "Tuntutan Fisik",
+    description: "Seberapa berat tuntutan fisik dari tugas ini?",
+    lowAnchor: "Sangat Rendah",
+    highAnchor: "Sangat Tinggi",
   },
   {
     key: "temporal",
-    label: "Temporal Demand",
-    description: "How hurried or rushed was the pace of the task?",
-    lowAnchor: "Very Low",
-    highAnchor: "Very High",
+    label: "Tuntutan Temporal",
+    description: "Seberapa tergesa-gesa atau terburu-buru tempo dari tugas ini?",
+    lowAnchor: "Sangat Rendah",
+    highAnchor: "Sangat Tinggi",
   },
   {
     key: "performance",
-    label: "Performance",
+    label: "Performa",
     description:
-      "How successful were you in accomplishing what you were asked to do?",
+      "Seberapa berhasil Anda dalam menyelesaikan apa yang diminta?",
     // Performance is oriented 0 = best, 100 = worst (Req 13.4).
-    lowAnchor: "Perfect",
-    highAnchor: "Failure",
+    lowAnchor: "Sempurna",
+    highAnchor: "Gagal",
   },
   {
     key: "effort",
-    label: "Effort",
+    label: "Usaha",
     description:
-      "How hard did you have to work to accomplish your level of performance?",
-    lowAnchor: "Very Low",
-    highAnchor: "Very High",
+      "Seberapa keras Anda harus bekerja untuk mencapai tingkat performa Anda?",
+    lowAnchor: "Sangat Rendah",
+    highAnchor: "Sangat Tinggi",
   },
   {
     key: "frustration",
-    label: "Frustration",
+    label: "Frustrasi",
     description:
-      "How insecure, discouraged, irritated, stressed, and annoyed were you?",
-    lowAnchor: "Very Low",
-    highAnchor: "Very High",
+      "Seberapa tidak aman, putus asa, jengkel, tertekan, dan kesal Anda?",
+    lowAnchor: "Sangat Rendah",
+    highAnchor: "Sangat Tinggi",
   },
 ] as const;
 
@@ -186,16 +186,16 @@ export default function NasaTlx({ scenario, onSubmit }: NasaTlxProps) {
     >
       <header className="flex flex-col gap-2">
         <h2 id={headingId} className="text-2xl font-semibold">
-          Workload questionnaire
+          Kuesioner beban kerja
           {scenario ? (
             <span className="ml-2 text-base font-normal text-neutral-400">
-              (Scenario {scenario})
+              (Skenario {scenario})
             </span>
           ) : null}
         </h2>
         <p className="text-sm text-neutral-400">
-          Rate each dimension from 0 to 100 based on how you experienced the
-          task you just completed.
+          Nilai setiap dimensi dari 0 hingga 100 berdasarkan pengalaman Anda
+          dalam tugas yang baru saja Anda selesaikan.
         </p>
       </header>
 
@@ -205,7 +205,7 @@ export default function NasaTlx({ scenario, onSubmit }: NasaTlxProps) {
           role="alert"
           className="rounded-md border border-amber-500/60 bg-amber-500/10 px-4 py-3 text-sm text-amber-200"
         >
-          Please rate every dimension before submitting. Still unrated:{" "}
+          Harap nilai setiap dimensi sebelum mengirim. Dimensi yang belum dinilai:{" "}
           {missing.map((d) => d.label).join(", ")}.
         </div>
       ) : null}
@@ -248,7 +248,7 @@ export default function NasaTlx({ scenario, onSubmit }: NasaTlxProps) {
                   onChange={(e) => rate(def.key, e.currentTarget.valueAsNumber)}
                   aria-describedby={descId}
                   aria-valuetext={
-                    entry.rated ? `${entry.value}` : "not yet rated"
+                    entry.rated ? `${entry.value}` : "belum dinilai"
                   }
                   className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-700 accent-neutral-100"
                 />
@@ -266,7 +266,7 @@ export default function NasaTlx({ scenario, onSubmit }: NasaTlxProps) {
                     htmlFor={numberId}
                     className="text-xs text-neutral-400"
                   >
-                    Value
+                    Nilai
                   </label>
                   <input
                     id={numberId}
@@ -293,7 +293,7 @@ export default function NasaTlx({ scenario, onSubmit }: NasaTlxProps) {
                       : "text-xs text-neutral-500"
                   }
                 >
-                  {entry.rated ? `Rated: ${entry.value}` : "Not yet rated"}
+                  {entry.rated ? `Dinilai: ${entry.value}` : "Belum dinilai"}
                 </span>
               </div>
             </li>
@@ -305,7 +305,7 @@ export default function NasaTlx({ scenario, onSubmit }: NasaTlxProps) {
         type="submit"
         className="inline-flex w-fit items-center rounded-md bg-neutral-100 px-5 py-3 text-sm font-semibold text-neutral-900 transition hover:bg-white"
       >
-        Submit ratings
+        Kirim penilaian
       </button>
     </form>
   );

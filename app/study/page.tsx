@@ -59,12 +59,13 @@ export default function StudyPage() {
           className="flex flex-col gap-4 rounded-xl border border-neutral-800 bg-neutral-950/60 p-8 text-center shadow-lg"
         >
           <h1 className="text-2xl font-semibold text-neutral-100">
-            Session ended
+            Sesi berakhir
           </h1>
           <p className="text-neutral-300">
-            You declined to participate, so the study session has ended. No
-            webcam access was requested and no data was collected. You can close
-            this tab, or return to the start if you change your mind.
+            Anda menolak untuk berpartisipasi, sehingga sesi studi telah
+            berakhir. Tidak ada akses kamera yang diminta dan tidak ada data
+            yang dikumpulkan. Anda dapat menutup tab ini, atau kembali ke awal
+            jika Anda berubah pikiran.
           </p>
         </section>
       </main>
@@ -80,7 +81,7 @@ export default function StudyPage() {
           className="flex flex-col gap-4 rounded-xl border border-red-900/60 bg-red-950/40 p-8 text-center shadow-lg"
         >
           <h1 className="text-2xl font-semibold text-red-100">
-            Could not start the study
+            Tidak dapat memulai studi
           </h1>
           <p className="text-red-100/90">{error}</p>
         </section>
