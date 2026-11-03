@@ -59,6 +59,12 @@ export interface ExportRow {
   /** Model artifact size in megabytes (Req 14.1). */
   modelSizeMb: number;
   interventionApplied: boolean;
+  /** Personalised EAR blink threshold derived at calibration, or null if skipped. */
+  calibratedBlinkThreshold: number | null;
+  /** Mean resting EAR measured at calibration, or null if skipped. */
+  calibrationMeanEar: number | null;
+  /** Number of valid EAR samples used at calibration, or null if skipped. */
+  calibrationSampleCount: number | null;
 }
 
 /**
@@ -87,6 +93,9 @@ export const EXPORT_COLUMNS: readonly (keyof ExportRow)[] = [
   "modelSizeBytes",
   "modelSizeMb",
   "interventionApplied",
+  "calibratedBlinkThreshold",
+  "calibrationMeanEar",
+  "calibrationSampleCount",
 ] as const;
 
 /** The result of flattening a session: ordered rows plus an empty-data flag. */
@@ -171,6 +180,9 @@ function toRow(session: StudySession, record: StudyRecord): ExportRow {
     modelSizeBytes: session.modelSizeBytes,
     modelSizeMb: bytesToMb(session.modelSizeBytes),
     interventionApplied: record.interventionApplied,
+    calibratedBlinkThreshold: session.calibratedBlinkThreshold ?? null,
+    calibrationMeanEar: session.calibrationMeanEar ?? null,
+    calibrationSampleCount: session.calibrationSampleCount ?? null,
   };
 }
 

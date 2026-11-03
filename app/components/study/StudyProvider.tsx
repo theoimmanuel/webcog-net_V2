@@ -63,7 +63,9 @@ import {
   type WebcamVisionPipeline,
 } from "@/lib/vision/pipeline";
 import { createClassifier, type CnnGruClassifier } from "@/lib/vision/classifier";
+import { FeatureExtractor, DEFAULT_BLINK_THRESHOLD } from "@/lib/vision/features";
 import { installNetworkGuard } from "@/lib/privacy/network-guard";
+import type { CalibrationResult } from "@/lib/vision/calibration";
 
 /**
  * The scenario order every participant receives. The study runs strictly
@@ -119,6 +121,19 @@ export interface StudyContextValue {
    * pipeline uses (Req 4.3), or 0 before it has loaded.
    */
   getModelSizeBytes: () => number;
+
+  /**
+   * Store the personalised blink-detection threshold derived from the
+   * calibration step. Must be called before getVisionPipeline() so the
+   * threshold is injected when the pipeline is created for Scenario C.
+   */
+  setBlinkThreshold: (result: CalibrationResult) => void;
+
+  /**
+   * The currently active blink threshold (personalised or default).
+   * Exposed for diagnostic display (e.g. the monitor HUD).
+   */
+  blinkThreshold: number;
 
   /**
    * Stop the webcam pipeline (if any) without clearing the in-memory session.
@@ -183,6 +198,7 @@ export function StudyProvider({
   const [ready, setReady] = useState(false);
   const [session, setSession] = useState<StudySession | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [blinkThreshold, setBlinkThresholdState] = useState<number>(DEFAULT_BLINK_THRESHOLD);
 
   // Mount: install the network guard, build the store + epoch + controller +
   // simulated trigger, and start the simulated source so the controller always
@@ -276,6 +292,18 @@ export function StudyProvider({
     [refresh],
   );
 
+  const setBlinkThreshold = useCallback((result: CalibrationResult) => {
+    setBlinkThresholdState(result.threshold);
+    // Persist the calibration result in the session store so it is included
+    // in the CSV / JSON export for each participant (diagnostic column).
+    storeRef.current?.setCalibration(
+      result.threshold,
+      result.meanRestingEar,
+      result.sampleCount,
+    );
+    refresh();
+  }, [refresh]);
+
   const stopVision = useCallback(() => {
     pipelineRef.current?.stop();
   }, []);
@@ -289,8 +317,11 @@ export function StudyProvider({
     classifierRef.current = classifier;
     // Create the webcam pipeline lazily (Scenario C only, after consent). It is
     // not started here — the caller starts it so denial handling is explicit.
+    // Inject the personalised blink threshold from calibration so the
+    // FeatureExtractor uses each participant's own resting-EAR baseline.
     const pipeline = createVisionPipeline({
       classifier,
+      featureExtractor: new FeatureExtractor({ blinkThreshold }),
       // Real face landmark source (Req 2.1). Resolved lazily inside start()
       // after camera permission + classifier load, so this stays synchronous
       // and a load failure follows the WebcamUnavailableError path (Req 2.5).
@@ -307,7 +338,7 @@ export function StudyProvider({
     });
     pipelineRef.current = pipeline;
     return pipeline;
-  }, [ready]);
+  }, [ready, blinkThreshold]);
 
   const getModelSizeBytes = useCallback((): number => {
     const classifier = classifierRef.current;
@@ -350,6 +381,8 @@ export function StudyProvider({
       grantConsent,
       setRecord,
       setModelSize,
+      setBlinkThreshold,
+      blinkThreshold,
       getVisionPipeline,
       getModelSizeBytes,
       stopVision,
@@ -363,6 +396,8 @@ export function StudyProvider({
       grantConsent,
       setRecord,
       setModelSize,
+      setBlinkThreshold,
+      blinkThreshold,
       getVisionPipeline,
       getModelSizeBytes,
       stopVision,

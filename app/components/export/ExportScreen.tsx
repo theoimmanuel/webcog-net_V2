@@ -61,6 +61,9 @@ function createEmptySession(): StudySession {
     records: {} as StudySession["records"],
     modelSizeBytes: 0,
     modelSizeExceeds: false,
+    calibratedBlinkThreshold: null,
+    calibrationMeanEar: null,
+    calibrationSampleCount: null,
   };
 }
 

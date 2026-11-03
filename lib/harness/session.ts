@@ -68,6 +68,15 @@ export interface StudySession {
   modelSizeBytes: number;
   /** True when the model artifact is >= 51,200 bytes (Req 4.6). */
   modelSizeExceeds: boolean;
+  /**
+   * Personalised EAR blink-detection threshold derived during the calibration
+   * step. null when calibration was skipped (default threshold was used).
+   */
+  calibratedBlinkThreshold: number | null;
+  /** Mean resting EAR measured during calibration, or null when skipped. */
+  calibrationMeanEar: number | null;
+  /** Number of valid EAR samples used during calibration, or null when skipped. */
+  calibrationSampleCount: number | null;
 }
 
 /** Byte threshold (50 KB) at and above which the model size flag is set (Req 4.6). */
@@ -93,6 +102,9 @@ function createEmptySession(participantId: string, sessionId: string): StudySess
     records: {} as Record<ScenarioId, StudyRecord>,
     modelSizeBytes: 0,
     modelSizeExceeds: false,
+    calibratedBlinkThreshold: null,
+    calibrationMeanEar: null,
+    calibrationSampleCount: null,
   };
 }
 
@@ -132,6 +144,8 @@ function isStudySession(value: unknown): value is StudySession {
     v.records !== null &&
     typeof v.modelSizeBytes === "number" &&
     typeof v.modelSizeExceeds === "boolean"
+    // calibratedBlinkThreshold / calibrationMeanEar / calibrationSampleCount
+    // are optional — absent in sessions persisted before calibration was added.
   );
 }
 
@@ -166,6 +180,17 @@ export class SessionStore {
         parsed.sessionId !== options.sessionId
       ) {
         return null;
+      }
+      // Back-fill calibration fields that may be absent in sessions persisted
+      // before this feature was added (forward-compat default = null).
+      if (parsed.calibratedBlinkThreshold === undefined) {
+        parsed.calibratedBlinkThreshold = null;
+      }
+      if (parsed.calibrationMeanEar === undefined) {
+        parsed.calibrationMeanEar = null;
+      }
+      if (parsed.calibrationSampleCount === undefined) {
+        parsed.calibrationSampleCount = null;
       }
       return parsed;
     } catch {
@@ -215,6 +240,22 @@ export class SessionStore {
     if (!this.session.consentGranted) return false;
     if (this.session.scenarioOrder !== null) return false;
     this.session.scenarioOrder = [...order] as ScenarioOrder;
+    this.persist();
+    return true;
+  }
+
+  /**
+   * Record the calibration result (personalised blink threshold + mean resting
+   * EAR). Rejected before consent. Safe to call multiple times — the last call
+   * wins so a re-calibration overwrites the previous result.
+   *
+   * @returns true if stored; false if the write was rejected (no consent).
+   */
+  setCalibration(threshold: number, meanEar: number, sampleCount: number): boolean {
+    if (!this.session.consentGranted) return false;
+    this.session.calibratedBlinkThreshold = threshold;
+    this.session.calibrationMeanEar = meanEar;
+    this.session.calibrationSampleCount = sampleCount;
     this.persist();
     return true;
   }
